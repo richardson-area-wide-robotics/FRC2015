@@ -2,10 +2,17 @@
 package org.usfirst.frc.team1745.robot;
 
 
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.Joystick.ButtonType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.buttons.Button;
+import edu.wpi.first.wpilibj.buttons.Trigger.ButtonScheduler;
+import edu.wpi.first.wpilibj.hal.CanTalonSRX;
 
 /**
  * This is a demo program showing the use of the RobotDrive class.
@@ -23,33 +30,54 @@ import edu.wpi.first.wpilibj.Timer;
  * don't. Unless you know what you are doing, complex code will be much more difficult under
  * this system. Use IterativeRobot or Command-Based instead if you're new.
  */
-public class Robot extends SampleRobot {
-    RobotDrive myRobot;
+public class Robot extends SampleRobot 
+{
+    Compressor myCompressor;
+    CanTalonSRX myTalon;
+    DoubleSolenoid mySolenoid;
     Joystick stick;
 
-    public Robot() {
-        myRobot = new RobotDrive(0, 1);
-        myRobot.setExpiration(0.1);
-        stick = new Joystick(0);
+    public Robot() 
+    {
+       stick = new Joystick(0);
+       myCompressor = new Compressor(2);
+       myTalon = new CanTalonSRX(3);
+       mySolenoid = new DoubleSolenoid(2,0,1);
     }
 
-    /**
-     * Drive left & right motors for 2 seconds then stop
-     */
-    public void autonomous() {
-        myRobot.setSafetyEnabled(false);
-        myRobot.drive(-0.5, 0.0);	// drive forwards half speed
-        Timer.delay(2.0);		//    for 2 seconds
-        myRobot.drive(0.0, 0.0);	// stop robot
+   
+    public void autonomous() 
+    {
+      
     }
 
-    /**
-     * Runs the motors with arcade steering.
-     */
+    
     public void operatorControl() {
-        myRobot.setSafetyEnabled(true);
-        while (isOperatorControl() && isEnabled()) {
-            myRobot.arcadeDrive(stick); // drive with arcade style (use right stick)
+        
+        while (isOperatorControl() && isEnabled()) 
+        {
+          	// Map the Y axis of the joystick to the talon
+        	myTalon.Set(stick.getY());
+            
+            // if the pressure is below switch preset turn on the compressor. else turn it off.
+            if(myCompressor.getPressureSwitchValue())
+            {
+            	myCompressor.start();
+            }
+            else
+            {
+            	myCompressor.start();
+            }
+            // if the trigger is presses actuate the solenoid
+            if(stick.getButton(ButtonType.kTrigger))
+            {
+            	mySolenoid.set(Value.kForward);
+            }
+            else
+            {
+            	mySolenoid.set(Value.kReverse);
+            }
+            	
             Timer.delay(0.005);		// wait for a motor update time
         }
     }
@@ -57,6 +85,7 @@ public class Robot extends SampleRobot {
     /**
      * Runs during test mode
      */
-    public void test() {
+    public void test() 
+    {
     }
 }
