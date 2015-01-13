@@ -48,7 +48,16 @@ public class Robot extends SampleRobot
    
     public void autonomous() 
     {
-      
+    	while (isAutonomous() && isEnabled())
+    	 // if the pressure is below switch preset turn on the compressor. else turn it off.
+        if(myCompressor.getPressureSwitchValue())
+        {
+        	myCompressor.start();
+        }
+        else
+        {
+        	myCompressor.start();
+        }
     }
 
     
