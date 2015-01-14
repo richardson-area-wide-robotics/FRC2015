@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.hal.CanTalonSRX;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * This is a demo program showing the use of the RobotDrive class.
@@ -32,30 +34,32 @@ import edu.wpi.first.wpilibj.hal.CanTalonSRX;
 public class Robot extends SampleRobot 
 {
     RobotDrive myRobot;
-    CANTalon myTalonZero; // Lift
-    CANTalon myTalonOne; //Front Left
-    CANTalon myTalonTwo; //Back Left
-    CANTalon myTalonThree; //Front Right
-    CANTalon myTalonFour; //Back Right
+    CANTalon lift; // Lift
+    CANTalon frontLeft; //Front Left
+    CANTalon backLeft; //Back Left
+    CANTalon frontRight; //Front Right
+    CANTalon backRight; //Back Right
     DoubleSolenoid mySolenoid;
     Joystick stick;
     Joystick gamepad;
     Compressor myCompressor;
-    /*SpeedController frontLeftMotor;
-    SpeedController frontRightMotor;
-    SpeedController backLeftMotor;
-    SpeedController backRightMotor;*/
+    SendableChooser driverStation;
+    boolean autoChoiceBin;
+    boolean autoChoiceTote;
+    boolean autoChoiceRobot;
+    boolean autoChoiceNone;
+    int autoChoice;
     
     
 
     public Robot() 
     {
        
-        myTalonZero = new CANTalon(0); // Lift
-        myTalonOne = new CANTalon(1); // Front Left
-        myTalonTwo = new CANTalon(2); // Back left
-        myTalonThree = new CANTalon(3); // Front Right
-        myTalonFour = new CANTalon(4); // Back Right
+        lift = new CANTalon(0); // Lift
+        frontLeft = new CANTalon(1); // Front Left
+        backLeft = new CANTalon(2); // Back left
+        frontRight = new CANTalon(3); // Front Right
+        backRight = new CANTalon(4); // Back Right
        
         mySolenoid = new DoubleSolenoid( 2, 0, 1);
         myCompressor = new Compressor(2);
@@ -63,8 +67,21 @@ public class Robot extends SampleRobot
         stick = new Joystick(0);
         gamepad = new Joystick(1);
        
-        myRobot = new RobotDrive(myTalonOne,myTalonTwo,myTalonThree,myTalonFour);
+        myRobot = new RobotDrive(frontLeft,backLeft,frontRight,backRight);
         myRobot.setExpiration(0.1);
+        
+        
+        //unsure exactly how this works 
+        driverStation.addObject("None", autoChoiceNone);
+        driverStation.addObject("Bin", autoChoiceBin);
+        driverStation.addObject("Tote", autoChoiceTote);
+        driverStation.addObject("Robot", autoChoiceRobot);
+        //or this
+        autoChoiceBin=SmartDashboard.getBoolean("Bin");
+        autoChoiceTote=SmartDashboard.getBoolean("Tote");
+        autoChoiceRobot=SmartDashboard.getBoolean("Robot");
+        autoChoiceNone=SmartDashboard.getBoolean("None");
+        
         
     }
 
@@ -73,10 +90,60 @@ public class Robot extends SampleRobot
      */
     public void autonomous() 
     {
-       // myRobot.setSafetyEnabled(false);
-       // myRobot.drive(-0.5, 0.0);	// drive forwards half speed
-       // Timer.delay(2.0);		//    for 2 seconds
-       // myRobot.drive(0.0, 0.0);	// stop robot
+    	myRobot.setSafetyEnabled(false);
+    	
+    	if(autoChoiceNone)
+    		autoChoice=0;
+    	if(autoChoiceBin)
+    		autoChoice=1;
+    	if(autoChoiceTote);
+    		autoChoice=2;
+		if(autoChoiceRobot)
+			autoChoice=3;
+		if(!(autoChoiceNone||autoChoiceBin||autoChoiceTote||autoChoiceRobot))
+			autoChoice=3;
+		
+		while(isAutonomous()&&isEnabled())
+		{
+			//Turn on compressor if more air is needed
+            if(myCompressor.getPressureSwitchValue())
+            {
+            	myCompressor.stop();
+            }
+            else
+            {
+            	myCompressor.start();
+            }
+            
+            
+            //switch between different auto modes via SmartDashboard
+			switch(autoChoice)
+			{
+				case(0)://"None" autonomous selected
+				{
+					System.out.println("Robot will remain still.");
+					break;
+				}
+				
+				case(1)://"Bin" autonomous selected
+				{
+					System.out.println("Robot will pickup bin and move to auto zone.");
+					break;
+				}
+				
+				case(2)://"Tote" autonomous selected
+				{
+					System.out.println("Robot will pickup yellow tote and move to auto zone.");
+					break;
+				}
+				
+				case(3)://"Robot" autonomous selected or no choice made
+				{
+					System.out.println("Robot will move to auto zone.");
+					break;
+				}
+			}
+		}
     }
 
     /**
@@ -88,7 +155,7 @@ public class Robot extends SampleRobot
         while (isOperatorControl() && isEnabled()) 
         {
            // spin motor for lift on joy stick throttle
-        	myTalonZero.set(stick.getThrottle()*0.1);
+        	lift.set(stick.getThrottle()*0.1);
         	
         	//Mecanum drive
         	myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
