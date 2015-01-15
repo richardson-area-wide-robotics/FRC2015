@@ -2,10 +2,16 @@
 package org.usfirst.frc.team1745.robot;
 
 
+import com.ni.vision.NIVision;
+import com.ni.vision.NIVision.DrawMode;
+import com.ni.vision.NIVision.Image;
+import com.ni.vision.NIVision.ShapeMode;
+
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
@@ -14,6 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.hal.CanTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.vision.AxisCamera;
 
 /**
  * This is a demo program showing the use of the RobotDrive class.
@@ -43,49 +50,27 @@ public class Robot extends SampleRobot
     Joystick stick;
     Joystick gamepad;
     Compressor myCompressor;
-<<<<<<< HEAD
     SendableChooser driverStation;
     boolean autoChoiceBin;
     boolean autoChoiceTote;
     boolean autoChoiceRobot;
     boolean autoChoiceNone;
-    int autoChoice;
+    int autoChoice;        
+    int session;
+    Image frame;
+    AxisCamera camera;
     
     
 
     public Robot() 
     {
        
-        lift = new CANTalon(0); // Lift
-        frontLeft = new CANTalon(1); // Front Left
-        backLeft = new CANTalon(2); // Back left
-        frontRight = new CANTalon(3); // Front Right
-        backRight = new CANTalon(4); // Back Right
-=======
-    
+        lift = new CANTalon(3); // Lift
+        frontLeft = new CANTalon(4); // Front Left
+        backLeft = new CANTalon(5); // Back left    
+        frontRight = new CANTalon(6); // Front Right
+        backRight=new CANTalon(7); // Back Right
 
-    
-    // The channel on the driver station that the joystick is connected to
-    SendableChooser driverStation;
-    boolean autoChoiceBin;
-    boolean autoChoiceTote;
-    boolean autoChoiceRobot;
-    boolean autoChoiceNone;
-    int autoChoice;
-    
-
-    
-
-    public Robot() 
-    {
-       
-        lift = new CANTalon(1); // Lift
-        frontLeft = new CANTalon(2); // Front Left
-        backLeft = new CANTalon(3); // Back left
-        frontRight = new CANTalon(4); // Front Right
-        backRight = new CANTalon(5); // Back Right
->>>>>>> origin/DEV-Adam
-       
         mySolenoid = new DoubleSolenoid( 2, 0, 1);
         myCompressor = new Compressor(2);
         
@@ -95,23 +80,29 @@ public class Robot extends SampleRobot
         myRobot = new RobotDrive(frontLeft,backLeft,frontRight,backRight);
         myRobot.setExpiration(0.1);
         
-        
         //unsure exactly how this works 
         driverStation.addObject("None", autoChoiceNone);
         driverStation.addObject("Bin", autoChoiceBin);
         driverStation.addObject("Tote", autoChoiceTote);
         driverStation.addObject("Robot", autoChoiceRobot);
+        
         //or this
         autoChoiceBin=SmartDashboard.getBoolean("Bin");
         autoChoiceTote=SmartDashboard.getBoolean("Tote");
         autoChoiceRobot=SmartDashboard.getBoolean("Robot");
         autoChoiceNone=SmartDashboard.getBoolean("None");
         
+        frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+
+        // open the camera at the IP address assigned. This is the IP address that the camera
+        // can be accessed through the web interface.
+        camera = new AxisCamera("10.1.91.100");
+
         
     }
 
     /**
-     * Drive left & right motors for 2 seconds then stop
+     * Check Driver Station for which Autonomous mode to Run
      */
     public void autonomous() 
     {
@@ -134,10 +125,12 @@ public class Robot extends SampleRobot
             if(myCompressor.getPressureSwitchValue())
             {
             	myCompressor.stop();
+            	System.out.println("Compressor off");
             }
             else
             {
             	myCompressor.start();
+            	System.out.println("Compressor on");
             }
             
             
@@ -168,36 +161,36 @@ public class Robot extends SampleRobot
 					break;
 				}
 			}
-		}
-<<<<<<< HEAD
-=======
-        if(myCompressor.getPressureSwitchValue())
-        {
-        	myCompressor.stop();
-        }
-        else
-        {
-        	myCompressor.start();
-        }
->>>>>>> origin/DEV-Adam
+		}		
     }
 
     /**
-     * Runs the motors with Mecanum Drive and lift.
+     * Runs the motors for Mecanum Drive and lift along with compressor and claw.
      */
     public void operatorControl() 
     {
         myRobot.setSafetyEnabled(true);
         while (isOperatorControl() && isEnabled()) 
         {
-           // spin motor for lift on joy stick throttle
-<<<<<<< HEAD
-        	lift.set(stick.getThrottle()*0.1);
-=======
-        	//lift.set(stick.getThrottle()*0.1);
+        	/**
+             * grab an image from the camera, draw the circle, and provide it for the camera server
+             * which will in turn send it to the dashboard.
+             */
+            NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+
+            while (isOperatorControl() && isEnabled()) {
+               //basic vision copied from example project
+            	camera.getImage(frame);
+                NIVision.imaqDrawShapeOnImage(frame, frame, rect,
+                        DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
+
+                CameraServer.getInstance().setImage(frame);
+        	
+            /* spin motor for lift on joy stick throttle
+        	   lift.set(stick.getThrottle()*0.1);*/
         	
         	//lift up
-        	while(stick.getRawButton(7)||gamepad.getRawButton(1))
+        	while(stick.getRawButton(7)||gamepad.getRawButton(7))
         		lift.set(.1);
         	lift.set(0);
         	
@@ -205,8 +198,7 @@ public class Robot extends SampleRobot
         	while(stick.getRawButton(8)||gamepad.getRawButton(8))
         		lift.set(-.1);
         	lift.set(0);
-        	
->>>>>>> origin/DEV-Adam
+
         	
         	//Mecanum drive
         	myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
@@ -222,27 +214,19 @@ public class Robot extends SampleRobot
             }
             
             //Actuate Solenoid for claw
-<<<<<<< HEAD
         	if(stick.getRawButton(1))
             	mySolenoid.set(Value.kForward);
             else
             	mySolenoid.set(Value.kReverse);
-=======
-        	if(stick.getRawButton(10)||gamepad.getRawButton(10))
-            	mySolenoid.set(Value.kForward);
-            else
-            	mySolenoid.set(Value.kReverse);
-        		
+
         	
->>>>>>> origin/DEV-Adam
-        	
-        	//System.out.println("Tallon Value: " + myTalon..toString());
+        	//System.out.println("Talon Value: " + myTalon..toString());
         	System.out.println("Solenoid Switch Value: " + mySolenoid.get().toString());
         	System.out.println("Compessor Switch Value: " + myCompressor.getPressureSwitchValue());
         	
         	Timer.delay(0.005);		// wait for a motor update time
         }
-        
+        }
     }
     
     
