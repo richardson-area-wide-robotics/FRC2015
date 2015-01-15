@@ -43,6 +43,7 @@ public class Robot extends SampleRobot
     Joystick stick;
     Joystick gamepad;
     Compressor myCompressor;
+<<<<<<< HEAD
     SendableChooser driverStation;
     boolean autoChoiceBin;
     boolean autoChoiceTote;
@@ -60,6 +61,30 @@ public class Robot extends SampleRobot
         backLeft = new CANTalon(2); // Back left
         frontRight = new CANTalon(3); // Front Right
         backRight = new CANTalon(4); // Back Right
+=======
+    
+
+    
+    // The channel on the driver station that the joystick is connected to
+    SendableChooser driverStation;
+    boolean autoChoiceBin;
+    boolean autoChoiceTote;
+    boolean autoChoiceRobot;
+    boolean autoChoiceNone;
+    int autoChoice;
+    
+
+    
+
+    public Robot() 
+    {
+       
+        lift = new CANTalon(1); // Lift
+        frontLeft = new CANTalon(2); // Front Left
+        backLeft = new CANTalon(3); // Back left
+        frontRight = new CANTalon(4); // Front Right
+        backRight = new CANTalon(5); // Back Right
+>>>>>>> origin/DEV-Adam
        
         mySolenoid = new DoubleSolenoid( 2, 0, 1);
         myCompressor = new Compressor(2);
@@ -144,6 +169,17 @@ public class Robot extends SampleRobot
 				}
 			}
 		}
+<<<<<<< HEAD
+=======
+        if(myCompressor.getPressureSwitchValue())
+        {
+        	myCompressor.stop();
+        }
+        else
+        {
+        	myCompressor.start();
+        }
+>>>>>>> origin/DEV-Adam
     }
 
     /**
@@ -155,7 +191,22 @@ public class Robot extends SampleRobot
         while (isOperatorControl() && isEnabled()) 
         {
            // spin motor for lift on joy stick throttle
+<<<<<<< HEAD
         	lift.set(stick.getThrottle()*0.1);
+=======
+        	//lift.set(stick.getThrottle()*0.1);
+        	
+        	//lift up
+        	while(stick.getRawButton(7)||gamepad.getRawButton(1))
+        		lift.set(.1);
+        	lift.set(0);
+        	
+        	//lift down
+        	while(stick.getRawButton(8)||gamepad.getRawButton(8))
+        		lift.set(-.1);
+        	lift.set(0);
+        	
+>>>>>>> origin/DEV-Adam
         	
         	//Mecanum drive
         	myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
@@ -171,10 +222,19 @@ public class Robot extends SampleRobot
             }
             
             //Actuate Solenoid for claw
+<<<<<<< HEAD
         	if(stick.getRawButton(1))
             	mySolenoid.set(Value.kForward);
             else
             	mySolenoid.set(Value.kReverse);
+=======
+        	if(stick.getRawButton(10)||gamepad.getRawButton(10))
+            	mySolenoid.set(Value.kForward);
+            else
+            	mySolenoid.set(Value.kReverse);
+        		
+        	
+>>>>>>> origin/DEV-Adam
         	
         	//System.out.println("Tallon Value: " + myTalon..toString());
         	System.out.println("Solenoid Switch Value: " + mySolenoid.get().toString());
