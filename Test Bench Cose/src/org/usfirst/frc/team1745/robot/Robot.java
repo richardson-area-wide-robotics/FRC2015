@@ -15,9 +15,7 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.hal.CanTalonSRX;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.vision.AxisCamera;
@@ -161,6 +159,7 @@ public class Robot extends SampleRobot
 					break;
 				}
 			}
+			
 		}		
     }
 
@@ -179,6 +178,7 @@ public class Robot extends SampleRobot
             NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
 
             while (isOperatorControl() && isEnabled()) {
+            	
                //basic vision copied from example project
             	camera.getImage(frame);
                 NIVision.imaqDrawShapeOnImage(frame, frame, rect,
@@ -186,22 +186,21 @@ public class Robot extends SampleRobot
 
                 CameraServer.getInstance().setImage(frame);
         	
-            /* spin motor for lift on joy stick throttle
-        	   lift.set(stick.getThrottle()*0.1);*/
         	
         	//lift up
         	while(stick.getRawButton(7)||gamepad.getRawButton(7))
-        		lift.set(.1);
+        		lift.set(.5);
         	lift.set(0);
         	
         	//lift down
         	while(stick.getRawButton(8)||gamepad.getRawButton(8))
-        		lift.set(-.1);
+        		lift.set(-.5);
         	lift.set(0);
 
         	
         	//Mecanum drive
         	myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
+        	
         	
         	//Turn on compressor if more air is needed
             if(myCompressor.getPressureSwitchValue())
@@ -212,6 +211,7 @@ public class Robot extends SampleRobot
             {
             	myCompressor.start();
             }
+            
             
             //Actuate Solenoid for claw
         	if(stick.getRawButton(1))
