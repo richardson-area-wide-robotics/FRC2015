@@ -6,57 +6,67 @@ import com.ni.vision.NIVision;
 import com.ni.vision.NIVision.DrawMode;
 import com.ni.vision.NIVision.Image;
 import com.ni.vision.NIVision.ShapeMode;
-
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.vision.AxisCamera;
 
-/**
- * This is a demo program showing the use of the RobotDrive class.
- * The SampleRobot class is the base of a robot application that will automatically call your
- * Autonomous and OperatorControl methods at the right time as controlled by the switches on
- * the driver station or the field controls.
- *
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the SampleRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the manifest file in the resource
- * directory.
- *
- * WARNING: While it may look like a good choice to use for your code if you're inexperienced,
- * don't. Unless you know what you are doing, complex code will be much more difficult under
- * this system. Use IterativeRobot or Command-Based instead if you're new.
- */
 public class Robot extends SampleRobot 
 {
     RobotDrive myRobot;
-    CANTalon lift; // Lift
-    CANTalon frontLeft; //Front Left
-    CANTalon backLeft; //Back Left
-    CANTalon frontRight; //Front Right
-    CANTalon backRight; //Back Right
-    DoubleSolenoid mySolenoid;
-    Joystick stick;
-    Joystick gamepad;
-    Compressor myCompressor;
-    SendableChooser driverStation;
+    
+    CANTalon lift; 		//3
+    CANTalon frontLeft; //4
+    CANTalon backLeft; 	//5
+    CANTalon frontRight;//6
+    CANTalon backRight; //7
+    
+    DoubleSolenoid mySolenoid;	//2
+    Compressor myCompressor;	//2
+    
+    Joystick stick;		//0
+    Joystick gamepad;	//1
+    
+    SendableChooser dashBoard;
+    Command autoChooser;
+    
     boolean autoChoiceBin;
     boolean autoChoiceTote;
     boolean autoChoiceRobot;
     boolean autoChoiceNone;
-    int autoChoice;        
+    int autoChoice;  
+    
     int session;
     Image frame;
     AxisCamera camera;
+    
+    Gyro gyro;
+    
+    boolean polarDrive;
+    boolean cartesianDrive;
+
+    JoystickButton armUpDrive;			//7
+    JoystickButton armUpOp;				//7
+    JoystickButton armDownDrive;		//8
+    JoystickButton armDownOp;			//8
+    JoystickButton clawDrive;			//10
+    JoystickButton clawOp;				//10
+    JoystickButton polarDriver;			//12
+    JoystickButton polarOp;				//12
+    JoystickButton cartesianDriver;		//11
+    JoystickButton cartesianOp;			//11
+    
     
     
 
@@ -79,24 +89,44 @@ public class Robot extends SampleRobot
         myRobot.setExpiration(0.1);
         
         //unsure exactly how this works 
-        driverStation.addObject("None", autoChoiceNone);
+        /*driverStation.addObject("None", autoChoiceNone);
         driverStation.addObject("Bin", autoChoiceBin);
         driverStation.addObject("Tote", autoChoiceTote);
-        driverStation.addObject("Robot", autoChoiceRobot);
-        
+        driverStation.addObject("Robot", autoChoiceRobot);*/
         //or this
+        SmartDashboard.putString("New Name", "None");
+        SmartDashboard.putString("DB/Button 1", "Bin");
+        SmartDashboard.putString("DB/Button 2", "Tote");
+        SmartDashboard.putString("DB/Button 3", "Robot");
+        //Same here
         autoChoiceBin=SmartDashboard.getBoolean("Bin");
         autoChoiceTote=SmartDashboard.getBoolean("Tote");
         autoChoiceRobot=SmartDashboard.getBoolean("Robot");
         autoChoiceNone=SmartDashboard.getBoolean("None");
         
         frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
-
         // open the camera at the IP address assigned. This is the IP address that the camera
         // can be accessed through the web interface.
         camera = new AxisCamera("10.1.91.100");
-
         
+        //Need to get correct channel, 1 or 0
+        gyro = new Gyro(0);
+        
+        //Start in Polar Drive Mode
+        polarDrive=true;
+        cartesianDrive=false;
+        
+        armUpDrive= new JoystickButton(stick,7);
+        armUpOp = new JoystickButton(gamepad,7);
+        armDownDrive= new JoystickButton(stick,8);
+        armDownOp = new JoystickButton(gamepad,8);
+        clawDrive= new JoystickButton(stick,10);
+        clawOp = new JoystickButton(gamepad,10);
+        polarDriver= new JoystickButton(stick,12);
+        polarOp = new JoystickButton(gamepad,12);
+        cartesianDriver= new JoystickButton(stick,11);
+        cartesianOp = new JoystickButton(gamepad,11);
+                
     }
 
     /**
@@ -169,8 +199,8 @@ public class Robot extends SampleRobot
     public void operatorControl() 
     {
         myRobot.setSafetyEnabled(true);
-        while (isOperatorControl() && isEnabled()) 
-        {
+       /* while (isOperatorControl() && isEnabled()) 
+        {*/
         	/**
              * grab an image from the camera, draw the circle, and provide it for the camera server
              * which will in turn send it to the dashboard.
@@ -188,36 +218,71 @@ public class Robot extends SampleRobot
         	
         	
         	//lift up
-        	while(stick.getRawButton(7)||gamepad.getRawButton(7))
+        	if(armUpDrive.get()||armUpOp.get())
+        	{
         		lift.set(.5);
-        	lift.set(0);
+        		System.out.println("Arm up");
+        	}
+        	else 
+        		lift.set(0);
         	
         	//lift down
-        	while(stick.getRawButton(8)||gamepad.getRawButton(8))
+        	if(armDownDrive.get()||armDownOp.get())
+        	{
         		lift.set(-.5);
-        	lift.set(0);
-
+        		System.out.println("Arm down");
+        	}
+        	else 
+        		lift.set(0);
         	
+        	
+        	//Mecanum drive Switch with buttons 11 & 12
+        	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on
+        	{
+        		polarDrive=false;
+        		System.out.println("Polar Drive Off");
+        		cartesianDrive=true;
+        		System.out.println("Cartision Drive On");
+        	}
+        	if (polarDriver.get()||polarOp.get())//Polar on
+        	{
+        		polarDrive=true;
+        		System.out.println("Polar Drive On");
+        		cartesianDrive=false;
+        		System.out.println("Cartision Drive Off");
+        	}
+
         	//Mecanum drive
-        	myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
+        	if(polarDrive)
+        		myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
+        	if(cartesianDrive)
+        		myRobot.mecanumDrive_Cartesian(stick.getX(), stick.getY(), stick.getTwist(), gyro.getAngle());
         	
         	
         	//Turn on compressor if more air is needed
             if(myCompressor.getPressureSwitchValue())
             {
             	myCompressor.stop();
+            	System.out.println("Compressor off");
             }
             else
             {
             	myCompressor.start();
+            	System.out.println("Compressor on");
             }
             
             
             //Actuate Solenoid for claw
-        	if(stick.getRawButton(1))
+        	if(clawDrive.get()||clawOp.get())
+        	{
             	mySolenoid.set(Value.kForward);
+            	System.out.println("claw closed");
+        	}
             else
+            {
             	mySolenoid.set(Value.kReverse);
+            	System.out.println("claw open");
+            }
 
         	
         	//System.out.println("Talon Value: " + myTalon..toString());
@@ -226,7 +291,7 @@ public class Robot extends SampleRobot
         	
         	Timer.delay(0.005);		// wait for a motor update time
         }
-        }
+       // }
     }
     
     
