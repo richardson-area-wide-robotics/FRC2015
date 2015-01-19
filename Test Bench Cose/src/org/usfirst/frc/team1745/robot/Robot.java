@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.vision.AxisCamera;
+import org.usfirst.frc.team1745.robot.P51RobotDefine;;
 
 public class Robot extends SampleRobot 
 {
@@ -73,17 +74,17 @@ public class Robot extends SampleRobot
     public Robot() 
     {
        
-        lift = new CANTalon(3); // Lift
-        frontLeft = new CANTalon(4); // Front Left
-        backLeft = new CANTalon(5); // Back left    
-        frontRight = new CANTalon(6); // Front Right
-        backRight=new CANTalon(7); // Back Right
+        lift = new CANTalon(P51RobotDefine.winch_CANID); // Lift
+        frontLeft = new CANTalon(P51RobotDefine.leftFrontMecanum_CANID); // Front Left
+        backLeft = new CANTalon(P51RobotDefine.leftBackMecanum_CANID); // Back left    
+        frontRight = new CANTalon(P51RobotDefine.rightFrontMecanum_CANID); // Front Right
+        backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
 
-        mySolenoid = new DoubleSolenoid( 2, 0, 1);
-        myCompressor = new Compressor(2);
+        mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
+        myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
         
-        stick = new Joystick(0);
-        gamepad = new Joystick(1);
+        stick = new Joystick(P51RobotDefine.driver_USBJoyStick);
+        gamepad = new Joystick(P51RobotDefine.operator_USBJoyStick);
        
         myRobot = new RobotDrive(frontLeft,backLeft,frontRight,backRight);
         myRobot.setExpiration(0.1);
@@ -110,22 +111,22 @@ public class Robot extends SampleRobot
         camera = new AxisCamera("10.1.91.100");
         
         //Need to get correct channel, 1 or 0
-        gyro = new Gyro(0);
+        gyro = new Gyro(P51RobotDefine.gyro_ANAChan);
         
         //Start in Polar Drive Mode
         polarDrive=true;
         cartesianDrive=false;
         
-        armUpDrive= new JoystickButton(stick,7);
-        armUpOp = new JoystickButton(gamepad,7);
-        armDownDrive= new JoystickButton(stick,8);
-        armDownOp = new JoystickButton(gamepad,8);
-        clawDrive= new JoystickButton(stick,10);
-        clawOp = new JoystickButton(gamepad,10);
-        polarDriver= new JoystickButton(stick,12);
-        polarOp = new JoystickButton(gamepad,12);
-        cartesianDriver= new JoystickButton(stick,11);
-        cartesianOp = new JoystickButton(gamepad,11);
+        armUpDrive= new JoystickButton(stick,P51RobotDefine.armUpButton_Driver);
+        armUpOp = new JoystickButton(gamepad,P51RobotDefine.armUpButton_Operator);
+        armDownDrive= new JoystickButton(stick,P51RobotDefine.armDownButton_Driver);
+        armDownOp = new JoystickButton(gamepad,P51RobotDefine.armDownButton_Operator);
+        clawDrive= new JoystickButton(stick,P51RobotDefine.clawControl_Driver);
+        clawOp = new JoystickButton(gamepad,P51RobotDefine.clawControl_Operator);
+        polarDriver= new JoystickButton(stick,P51RobotDefine.mecanumModeToPolar_Driver);
+        polarOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToPolar_Operator);
+        cartesianDriver= new JoystickButton(stick,P51RobotDefine.mecanumModeToCartesian_Driver);
+        cartesianOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToCartesian_Operator);
                 
     }
 
