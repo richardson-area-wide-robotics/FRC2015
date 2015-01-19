@@ -24,21 +24,21 @@ public final class P51RobotDefine
 	public static final int rightFrontMecanum_CANID = 4;
 	public static final int leftBackMecanum_CANID = 5;
 	public static final int rightBackMecanum_CANID = 6;
-	public static final int wench_CANID = 7;
+	public static final int winch_CANID = 7;
 	
 	//Motor PDP Channel Locations
 	public static final int leftFrontMecanum_PDPLoc = 1;
 	public static final int rightFrontMecanum_PDPLoc = 3;
 	public static final int leftBackMecanum_PDPLoc = 5;
 	public static final int rightBackMecanum_PDPLoc = 7;
-	public static final int wench_PDPLoc = 8;
+	public static final int winch_PDPLoc = 8;
 	
 	//Circuit Breaker values
 	public static final CircuitBrakerSize leftFrontMecanum_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
 	public static final CircuitBrakerSize rightFrontMecanum_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
 	public static final CircuitBrakerSize leftBackMecanum_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
 	public static final CircuitBrakerSize rightBackMecanum_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
-	public static final CircuitBrakerSize wench_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
+	public static final CircuitBrakerSize winch_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
 	
 	//Motor Types
 	
