@@ -2,25 +2,27 @@
 package org.usfirst.frc.team1745.robot;
 
 
-import com.ni.vision.NIVision;
-import com.ni.vision.NIVision.DrawMode;
-import com.ni.vision.NIVision.Image;
-import com.ni.vision.NIVision.ShapeMode;
+//import com.ni.vision.NIVision;
+//import com.ni.vision.NIVision.DrawMode;
+//import com.ni.vision.NIVision.Image;
+//import com.ni.vision.NIVision.ShapeMode;
+
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.CameraServer;
+//import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.vision.AxisCamera;
+//import edu.wpi.first.wpilibj.command.Command;
+//import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+//import edu.wpi.first.wpilibj.vision.AxisCamera;
+
 import org.usfirst.frc.team1745.robot.P51RobotDefine;;
 
 public class Robot extends SampleRobot 
@@ -39,8 +41,8 @@ public class Robot extends SampleRobot
     Joystick stick;		//0
     Joystick gamepad;	//1
     
-    SendableChooser dashBoard;
-    Command autoChooser;
+    //SendableChooser dashBoard;
+    //Command autoChooser;
     
     boolean autoChoiceBin;
     boolean autoChoiceTote;
@@ -48,9 +50,9 @@ public class Robot extends SampleRobot
     boolean autoChoiceNone;
     int autoChoice;  
     
-    int session;
-    Image frame;
-    AxisCamera camera;
+  //  int session;
+    //Image frame;
+    //AxisCamera camera;
     
     Gyro gyro;
     
@@ -93,7 +95,7 @@ public class Robot extends SampleRobot
         /*driverStation.addObject("None", autoChoiceNone);
         driverStation.addObject("Bin", autoChoiceBin);
         driverStation.addObject("Tote", autoChoiceTote);
-        driverStation.addObject("Robot", autoChoiceRobot);*/
+        driverStation.addObject("Robot", autoChoiceRobot);/
         //or this
         SmartDashboard.putString("New Name", "None");
         SmartDashboard.putString("DB/Button 1", "Bin");
@@ -103,12 +105,12 @@ public class Robot extends SampleRobot
         autoChoiceBin=SmartDashboard.getBoolean("Bin");
         autoChoiceTote=SmartDashboard.getBoolean("Tote");
         autoChoiceRobot=SmartDashboard.getBoolean("Robot");
-        autoChoiceNone=SmartDashboard.getBoolean("None");
+        autoChoiceNone=SmartDashboard.getBoolean("None");*/
         
-        frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+      //  frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
         // open the camera at the IP address assigned. This is the IP address that the camera
         // can be accessed through the web interface.
-        camera = new AxisCamera("10.1.91.100");
+        //camera = new AxisCamera("10.1.91.100");
         
         //Need to get correct channel, 1 or 0
         gyro = new Gyro(P51RobotDefine.gyro_ANAChan);
@@ -199,40 +201,51 @@ public class Robot extends SampleRobot
      */
     public void operatorControl() 
     {
-        myRobot.setSafetyEnabled(true);
-       /* while (isOperatorControl() && isEnabled()) 
-        {*/
+    	System.err.println("before safty");
+       myRobot.setSafetyEnabled(true);
+        while (isOperatorControl() && isEnabled()) 
+        {
         	/**
              * grab an image from the camera, draw the circle, and provide it for the camera server
              * which will in turn send it to the dashboard.
              */
+        	/*System.err.println("before NI Vision");
             NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
-
+            System.out.println("after NI Vision");
             while (isOperatorControl() && isEnabled()) {
-            	
+            	System.out.println("in main while loop");
                //basic vision copied from example project
             	camera.getImage(frame);
                 NIVision.imaqDrawShapeOnImage(frame, frame, rect,
                         DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
 
                 CameraServer.getInstance().setImage(frame);
-        	
-        	
+                System.out.println("drawing on camera");
+        	*/
         	//lift up
+                
         	if(armUpDrive.get()||armUpOp.get())
         	{
-        		lift.set(.5);
+        		lift.set(P51RobotDefine.armUpSpeed);
         		System.out.println("Arm up");
-        	}
+        		/*if(polarDrive)
+            		myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
+            	if(cartesianDrive)
+            		myRobot.mecanumDrive_Cartesian(stick.getX(), stick.getY(), stick.getTwist(), gyro.getAngle());
+        	*/}
         	else 
         		lift.set(0);
         	
         	//lift down
         	if(armDownDrive.get()||armDownOp.get())
         	{
-        		lift.set(-.5);
+        		lift.set(P51RobotDefine.armDownSpeed);
         		System.out.println("Arm down");
-        	}
+        		/*if(polarDrive)
+            		myRobot.mecanumDrive_Polar(stick.getX(), stick.getY(), stick.getTwist());
+            	if(cartesianDrive)
+            		myRobot.mecanumDrive_Cartesian(stick.getX(), stick.getY(), stick.getTwist(), gyro.getAngle());
+        	*/}
         	else 
         		lift.set(0);
         	

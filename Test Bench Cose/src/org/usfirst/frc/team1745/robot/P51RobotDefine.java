@@ -68,6 +68,10 @@ public final class P51RobotDefine
 	public static final int mecanumModeToCartesian_Driver = 12;
 	public static final int mecanumModeToCartesian_Operator = 12;
 	
+	//Arm Motor Speeds
+	public static final double armUpSpeed = .5;
+	public static final double armDownSpeed = -.5;
+	
 	public P51RobotDefine()
 	{
 		
