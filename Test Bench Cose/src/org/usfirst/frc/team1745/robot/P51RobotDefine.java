@@ -53,8 +53,8 @@ public final class P51RobotDefine
 	
 	
 	//OI Locations
-	public static final int driver_USBJoyStick = 1;
-	public static final int operator_USBJoyStick = 2;
+	public static final int driver_USBJoyStick = 0;
+	public static final int operator_USBJoyStick = 1;
 	
 	//Controls operator values are temp
 	public static final int armUpButton_Driver = 7;

@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.vision.AxisCamera;
 
+
 import org.usfirst.frc.team1745.robot.P51RobotDefine;;
 
 public class Robot extends SampleRobot 
@@ -81,9 +82,10 @@ public class Robot extends SampleRobot
         backLeft = new CANTalon(P51RobotDefine.leftBackMecanum_CANID); // Back left    
         frontRight = new CANTalon(P51RobotDefine.rightFrontMecanum_CANID); // Front Right
         backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
-
-        mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
-        myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
+       //@TODO Fix COmpressor 
+       // myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
+       // mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
+       
         
         stick = new Joystick(P51RobotDefine.driver_USBJoyStick);
         gamepad = new Joystick(P51RobotDefine.operator_USBJoyStick);
@@ -152,18 +154,21 @@ public class Robot extends SampleRobot
 		
 		while(isAutonomous()&&isEnabled())
 		{
+			/*@FIX COmpressor
 			//Turn on compressor if more air is needed
             if(myCompressor.getPressureSwitchValue())
             {
-            	myCompressor.stop();
+            	//@TODO Fix Compressor
+            	//myCompressor.stop();
             	System.out.println("Compressor off");
             }
             else
             {
-            	myCompressor.start();
+            	//@TODO Fix COmpressor
+            	//myCompressor.start();
             	System.out.println("Compressor on");
             }
-            
+            */
             
             //switch between different auto modes via SmartDashboard
 			switch(autoChoice)
@@ -273,6 +278,7 @@ public class Robot extends SampleRobot
         		myRobot.mecanumDrive_Cartesian(stick.getX(), stick.getY(), stick.getTwist(), gyro.getAngle());
         	
         	
+        	/*@TODO Fix Compressor
         	//Turn on compressor if more air is needed
             if(myCompressor.getPressureSwitchValue())
             {
@@ -281,27 +287,27 @@ public class Robot extends SampleRobot
             }
             else
             {
-            	myCompressor.start();
+            	//@TODO Fix Compressor
+            	//myCompressor.start();
             	System.out.println("Compressor on");
             }
-            
+            */
             
             //Actuate Solenoid for claw
         	if(clawDrive.get()||clawOp.get())
         	{
-            	mySolenoid.set(Value.kForward);
+        		/*@TODO FIX Solenoid */
+        		//mySolenoid.set(Value.kForward);
             	System.out.println("claw closed");
         	}
             else
-            {
-            	mySolenoid.set(Value.kReverse);
+            {/*@TODO FIX Solenoid */
+            //	mySolenoid.set(Value.kReverse);
             	System.out.println("claw open");
             }
 
         	
         	//System.out.println("Talon Value: " + myTalon..toString());
-        	System.out.println("Solenoid Switch Value: " + mySolenoid.get().toString());
-        	System.out.println("Compessor Switch Value: " + myCompressor.getPressureSwitchValue());
         	
         	Timer.delay(0.005);		// wait for a motor update time
         }
