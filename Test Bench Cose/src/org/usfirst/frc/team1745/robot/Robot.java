@@ -13,11 +13,13 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 //import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -44,6 +46,8 @@ public class Robot extends SampleRobot
     
     SendableChooser dashBoard;
     //Command autoChooser;
+    LiveWindow vFeed;
+    
     
     boolean autoChoiceBin;
     boolean autoChoiceTote;
@@ -52,9 +56,10 @@ public class Robot extends SampleRobot
     int autoChoice;  
     
     int session;
-    Image frame;
-    AxisCamera camera;
-    USBCamera usbCamera;
+    //Image frame;
+    //AxisCamera camera;
+    //USBCamera usbCamera;
+    CameraServer cServer;
     
     Gyro gyro;
     
@@ -97,6 +102,8 @@ public class Robot extends SampleRobot
         gamepad = new Joystick(P51RobotDefine.operator_USBJoyStick);
        
         myRobot = new RobotDrive(frontLeft,backLeft,frontRight,backRight);
+        myRobot.setInvertedMotor(MotorType.kFrontRight, true);
+        myRobot.setInvertedMotor(MotorType.kRearRight, true);
         myRobot.setExpiration(0.1);
         
         //unsure exactly how this works 
@@ -115,12 +122,16 @@ public class Robot extends SampleRobot
         autoChoiceRobot=SmartDashboard.getBoolean("Robot");
         autoChoiceNone=SmartDashboard.getBoolean("None");*/
         
-        frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
+        //frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
         // open the camera at the IP address assigned. This is the IP address that the camera
         // can be accessed through the web interface.
-        camera = new AxisCamera("10.1.91.100");
+        //camera = new AxisCamera("10.1.91.100");
         
-        usbCamera = new USBCamera("Camera");
+        vFeed = new LiveWindow();
+        LiveWindow.setEnabled(true);
+        
+        //usbCamera = new USBCamera();
+        cServer=CameraServer.getInstance();
         
         //Need to get correct channel, 1 or 0
         gyro = new Gyro(P51RobotDefine.gyro_ANAChan);
@@ -226,16 +237,20 @@ public class Robot extends SampleRobot
        * which will in turn send it to the dashboard.
        */
   	   System.err.printf("before NI Vision");
-       NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+       //NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
        System.out.printf("after NI Vision");
-        while (isOperatorControl() && isEnabled()) 
+       cServer.startAutomaticCapture(); 
+       while (isOperatorControl() && isEnabled()) 
         {
-           	usbCamera.getImage(frame);
+        	//usbCamera.startCapture();
+        	
+          	//usbCamera.getImage(frame);
           //NIVision.imaqDrawShapeOnImage(frame, frame, rect,DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
           //CameraServer.getInstance().setImage(frame);
           // System.out.println("drawing on camera");
         	
-        	
+    	   LiveWindow.run();
+    	   //LiveWindow.addSensor("Camera", 0, LiveWindow.component);
         	//arm at rest  
         	if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
         	{
