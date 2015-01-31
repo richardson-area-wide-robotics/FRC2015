@@ -72,6 +72,9 @@ public final class P51RobotDefine
 	public static final double armUpSpeed = .5;
 	public static final double armDownSpeed = -.5;
 	
+	//Dead-Band Exponent
+	public static final int deadbandExponent = 3;
+	
 	public P51RobotDefine()
 	{
 		

@@ -10,7 +10,7 @@ import com.ni.vision.NIVision.ShapeMode;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-//import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -22,11 +22,9 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.vision.AxisCamera;
+import edu.wpi.first.wpilibj.vision.USBCamera;
 
-
-
-
-import org.usfirst.frc.team1745.robot.P51RobotDefine;;
+import org.usfirst.frc.team1745.robot.P51RobotDefine;
 
 public class Robot extends SampleRobot 
 {
@@ -56,6 +54,7 @@ public class Robot extends SampleRobot
     int session;
     Image frame;
     AxisCamera camera;
+    USBCamera usbCamera;
     
     Gyro gyro;
     
@@ -73,9 +72,11 @@ public class Robot extends SampleRobot
     JoystickButton cartesianDriver;		//11
     JoystickButton cartesianOp;			//11
     
-    double x;
-    double y;
+    /*double xAxis;
+    double yAxis;
     double twist;
+    double magnitude;
+    double angle;*/
     
     
     
@@ -88,7 +89,6 @@ public class Robot extends SampleRobot
         backLeft = new CANTalon(P51RobotDefine.leftBackMecanum_CANID); // Back left    
         frontRight = new CANTalon(P51RobotDefine.rightFrontMecanum_CANID); // Front Right
         backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
-       //@TODO Fix COmpressor 
         myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
        // mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
        
@@ -120,6 +120,8 @@ public class Robot extends SampleRobot
         // can be accessed through the web interface.
         camera = new AxisCamera("10.1.91.100");
         
+        usbCamera = new USBCamera("Camera");
+        
         //Need to get correct channel, 1 or 0
         gyro = new Gyro(P51RobotDefine.gyro_ANAChan);
         
@@ -138,9 +140,11 @@ public class Robot extends SampleRobot
         cartesianDriver= new JoystickButton(stick,P51RobotDefine.mecanumModeToCartesian_Driver);
         cartesianOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToCartesian_Operator);
                 
-        x=0;
-        y=0;
+        /*xAxis=0;
+        yAxis=0;
         twist=0;
+        magnitude=0;
+        angle=0;*/
     }
 
     /**
@@ -215,100 +219,104 @@ public class Robot extends SampleRobot
      */
     public void operatorControl() 
     {
-    	System.err.println("before safty");
+    	System.out.printf("before safety");
        myRobot.setSafetyEnabled(true);
+       /**
+       * grab an image from the camera, draw the circle, and provide it for the camera server
+       * which will in turn send it to the dashboard.
+       */
+  	   System.err.printf("before NI Vision");
+       NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
+       System.out.printf("after NI Vision");
         while (isOperatorControl() && isEnabled()) 
         {
-        	/**
-             * grab an image from the camera, draw the circle, and provide it for the camera server
-             * which will in turn send it to the dashboard.
-             */
-        	System.err.println("before NI Vision");
-            NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
-            System.out.println("after NI Vision");
-            //while (isOperatorControl() && isEnabled()) {
-            	System.out.println("in main while loop");
-               //basic vision copied from example project
-            	//camera.getImage(frame);
-                //NIVision.imaqDrawShapeOnImage(frame, frame, rect,
-                  //      DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
-
-                //CameraServer.getInstance().setImage(frame);
-               // System.out.println("drawing on camera");
+           	usbCamera.getImage(frame);
+          //NIVision.imaqDrawShapeOnImage(frame, frame, rect,DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
+          //CameraServer.getInstance().setImage(frame);
+          // System.out.println("drawing on camera");
         	
-        	//lift up
-                lift.set(0);
-        	if(armUpDrive.get()||armUpOp.get())
+        	
+        	//arm at rest  
+        	if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
         	{
-        		lift.set(P51RobotDefine.armUpSpeed);
-        		System.out.println("Arm up");
+        		lift.set(0);
+        	}
+       		//lift up
+       		if(armUpDrive.get()||armUpOp.get())        		
+       		{
+       			lift.set(P51RobotDefine.armUpSpeed);
+       			System.out.printf("Arm up");
+       		}
+       		//lift down
+       		if(armDownDrive.get()||armDownOp.get())
+       		{
+       			lift.set(P51RobotDefine.armDownSpeed);
+        		System.out.printf("Arm down");
         	}
         	
-        	//lift down
-        	if(armDownDrive.get()||armDownOp.get())
-        	{
-        		lift.set(P51RobotDefine.armDownSpeed);
-        		System.out.println("Arm down");
-        	}
-        	
-        	
+       		
         	//Mecanum drive Switch with buttons 11 & 12
         	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on
         	{
         		polarDrive=false;
-        		System.out.println("Polar Drive Off");
+        		System.out.printf("Polar Drive Off");
         		cartesianDrive=true;
-        		System.out.println("Cartision Drive On");
+        		System.out.printf("Cartision Drive On");
         	}
         	if (polarDriver.get()||polarOp.get())//Polar on
         	{
         		polarDrive=true;
-        		System.out.println("Polar Drive On");
+        		System.out.printf("Polar Drive On");
         		cartesianDrive=false;
-        		System.out.println("Cartesian Drive Off");
+        		System.out.printf("Cartesian Drive Off");
         	}
 
         	
         	//Mecanum drive
-        	if(Math.abs(stick.getX())!=0||Math.abs(stick.getY())!=0||Math.abs(stick.getTwist())!=0)
+        	if(stick.getX()!=0||stick.getY()!=0||stick.getTwist()!=0)
         	{
+        	
+        		/*if(stick.getX()>.05)
+        			xAxis=Math.pow((stick.getX()-.05)/(.95),3);
+        		if(stick.getX()<-.05)
+        			xAxis=Math.pow((stick.getX()+.05)/(.95),3);
+        	
+        		if(stick.getY()>.05)
+        			yAxis=Math.pow((stick.getY()-.05)/(.95),3);
+        		if(stick.getY()<-.05)
+        			yAxis=Math.pow((stick.getY()+.05)/(.95),3);
+        	
+        		if(stick.getTwist()>.05)
+        			twist=Math.pow((stick.getTwist()-.05)/(.95),3);
+        		if(stick.getTwist()<-.05)
+        			twist=Math.pow((stick.getTwist()+.05)/(.95),3);*/
         		
-        	
-        	if(stick.getX()>.05)
-        		x=Math.pow((stick.getX()-.05)/(.95),3);
-        	if(stick.getX()<-.05)
-        		x=Math.pow((stick.getX()+.05)/(.95),3);
-        	
-        	
-        	if(stick.getY()>.05)
-        		y=Math.pow((stick.getY()-.05)/(.95),3);
-        	if(stick.getY()<-.05)
-        		y=Math.pow((stick.getY()+.05)/(.95),3);
-        	
-        	
-        	if(stick.getTwist()>.05)
-        		twist=Math.pow((stick.getTwist()-.05)/(.95),3);
-        	if(stick.getTwist()<-.05)
-        		twist=Math.pow((stick.getTwist()+.05)/(.95),3);
         		
-        	if(polarDrive)
-        		myRobot.mecanumDrive_Polar(x,y,twist);
-        	if(cartesianDrive)
-        		myRobot.mecanumDrive_Cartesian(x,y,twist, gyro.getAngle());
+        		if(polarDrive)
+        		{
+        			//magnitude = Math.sqrt(Math.pow(xAxis,2)+Math.pow(yAxis,2));
+        			//angle = Math.atan2(yAxis,xAxis);
+        			myRobot.mecanumDrive_Polar(RobotDriveMath.polarMagnitude(stick.getX(),stick.getY()),
+        					RobotDriveMath.polarAngle(stick.getX(),stick.getY()),
+        					RobotDriveMath.twistWithDeadband(stick.getTwist()));
+        		}
+        		if(cartesianDrive)
+        			myRobot.mecanumDrive_Cartesian(RobotDriveMath.xWithDeadband(stick.getX()),
+        					RobotDriveMath.yWithDeadband(stick.getY()),
+        					RobotDriveMath.twistWithDeadband(stick.getTwist()), gyro.getAngle());
         	}
         	
-        	//Fix Compressor
         	//Turn on compressor if more air is needed
             if(myCompressor.getPressureSwitchValue())
             {
             	myCompressor.stop();
-            	System.out.println("Compressor off");
+            	System.out.printf("Compressor off");
             }
             else
             {
             	//@TODO Fix Compressor
             	myCompressor.start();
-            	System.out.println("Compressor on");
+            	System.out.printf("Compressor on");
             }
             
             
@@ -317,20 +325,16 @@ public class Robot extends SampleRobot
         	{
         		/*@TODO FIX Solenoid */
         		//mySolenoid.set(Value.kForward);
-            	System.out.println("claw closed");
+            	System.out.printf("claw closed");
         	}
             else
             {/*@TODO FIX Solenoid */
             //	mySolenoid.set(Value.kReverse);
-            	System.out.println("claw open");
+            	System.out.printf("claw open");
             }
-
-        	
-        	//System.out.println("Talon Value: " + myTalon..toString());
         	
         	Timer.delay(0.005);		// wait for a motor update time
         }
-       // }
     }
     
     
@@ -340,6 +344,6 @@ public class Robot extends SampleRobot
      */
     public void test() 
     {
-    	System.out.println("Welcome to Test Mode!");
+    	System.out.printf("Welcome to Test Mode!");
     }
 }
