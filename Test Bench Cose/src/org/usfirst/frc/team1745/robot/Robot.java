@@ -2,16 +2,18 @@
 package org.usfirst.frc.team1745.robot;
 
 
-import com.ni.vision.NIVision;
+/*import com.ni.vision.NIVision;
 import com.ni.vision.NIVision.DrawMode;
 import com.ni.vision.NIVision.Image;
-import com.ni.vision.NIVision.ShapeMode;
+import com.ni.vision.NIVision.ShapeMode;*/
 
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Encoder;
+//import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+//import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
@@ -23,20 +25,23 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 //import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.vision.AxisCamera;
-import edu.wpi.first.wpilibj.vision.USBCamera;
+//import edu.wpi.first.wpilibj.vision.AxisCamera;
+//import edu.wpi.first.wpilibj.vision.USBCamera;
+
+
 
 import org.usfirst.frc.team1745.robot.P51RobotDefine;
+import org.usfirst.frc.team1745.robot.P51Camera;
 
 public class Robot extends SampleRobot 
 {
     RobotDrive myRobot;
     
-    CANTalon lift; 		//3
-    CANTalon frontLeft; //4
+    CANTalon frontLeft; //3
+    CANTalon frontRight;//4
     CANTalon backLeft; 	//5
-    CANTalon frontRight;//6
-    CANTalon backRight; //7
+    CANTalon backRight; //6
+    CANTalon lift; 		//7
     
     DoubleSolenoid mySolenoid;	//2
     Compressor myCompressor;	//2
@@ -47,7 +52,7 @@ public class Robot extends SampleRobot
     SendableChooser dashBoard;
     //Command autoChooser;
     LiveWindow vFeed;
-    
+    SmartDashboard dBoard;
     
     boolean autoChoiceBin;
     boolean autoChoiceTote;
@@ -55,11 +60,12 @@ public class Robot extends SampleRobot
     boolean autoChoiceNone;
     int autoChoice;  
     
-    int session;
+    //int session;
     //Image frame;
     //AxisCamera camera;
     //USBCamera usbCamera;
-    CameraServer cServer;
+    //CameraServer cServer;
+    P51Camera tServer;
     
     Gyro gyro;
     
@@ -83,7 +89,10 @@ public class Robot extends SampleRobot
     double magnitude;
     double angle;*/
     
-    
+    Encoder frontLeftEnc;
+    Encoder frontRightEnc;
+    Encoder backLeftEnc;
+    Encoder backRightEnc;
     
 
     public Robot() 
@@ -95,9 +104,8 @@ public class Robot extends SampleRobot
         frontRight = new CANTalon(P51RobotDefine.rightFrontMecanum_CANID); // Front Right
         backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
         myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
-       // mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
+        //mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
        
-        
         stick = new Joystick(P51RobotDefine.driver_USBJoyStick);
         gamepad = new Joystick(P51RobotDefine.operator_USBJoyStick);
        
@@ -107,20 +115,21 @@ public class Robot extends SampleRobot
         myRobot.setExpiration(0.1);
         
         //unsure exactly how this works 
-        /*driverStation.addObject("None", autoChoiceNone);
-        driverStation.addObject("Bin", autoChoiceBin);
-        driverStation.addObject("Tote", autoChoiceTote);
-        driverStation.addObject("Robot", autoChoiceRobot);/
+        dashBoard.addObject("None", autoChoiceNone);
+        dashBoard.addObject("Bin", autoChoiceBin);
+        dashBoard.addObject("Tote", autoChoiceTote);
+        dashBoard.addDefault("Robot", autoChoiceRobot);
+        SmartDashboard.putData("Auto-Mode Choice", dashBoard);
         //or this
-        SmartDashboard.putString("New Name", "None");
-        SmartDashboard.putString("DB/Button 1", "Bin");
-        SmartDashboard.putString("DB/Button 2", "Tote");
-        SmartDashboard.putString("DB/Button 3", "Robot");
+        /*SmartDashboard.putString("nOne", "None");
+        SmartDashboard.putString("bIn", "Bin");
+        SmartDashboard.putString("tOte", "Tote");
+        SmartDashboard.putString("rObot", "Robot");
         //Same here
-        autoChoiceBin=SmartDashboard.getBoolean("Bin");
-        autoChoiceTote=SmartDashboard.getBoolean("Tote");
-        autoChoiceRobot=SmartDashboard.getBoolean("Robot");
-        autoChoiceNone=SmartDashboard.getBoolean("None");*/
+        autoChoiceBin=SmartDashboard.getBoolean("bIn");
+        autoChoiceTote=SmartDashboard.getBoolean("tOte");
+        autoChoiceRobot=SmartDashboard.getBoolean("rObott");
+        autoChoiceNone=SmartDashboard.getBoolean("nOne");*/
         
         //frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
         // open the camera at the IP address assigned. This is the IP address that the camera
@@ -131,7 +140,8 @@ public class Robot extends SampleRobot
         LiveWindow.setEnabled(true);
         
         //usbCamera = new USBCamera();
-        cServer=CameraServer.getInstance();
+        //cServer=CameraServer.getInstance();
+        tServer= new P51Camera();
         
         //Need to get correct channel, 1 or 0
         gyro = new Gyro(P51RobotDefine.gyro_ANAChan);
@@ -156,6 +166,12 @@ public class Robot extends SampleRobot
         twist=0;
         magnitude=0;
         angle=0;*/
+        
+        frontLeftEnc = new Encoder(0,1,false,EncodingType.k2X);
+        frontRightEnc = new Encoder(0,1,true,EncodingType.k2X);
+        backLeftEnc = new Encoder(0,1,false,EncodingType.k2X);
+        backRightEnc = new Encoder(0,1,true,EncodingType.k2X);
+        
     }
 
     /**
@@ -178,21 +194,20 @@ public class Robot extends SampleRobot
 		
 		while(isAutonomous()&&isEnabled())
 		{
-			/*@FIX COmpressor
+			//@FIX COmpressor
 			//Turn on compressor if more air is needed
             if(myCompressor.getPressureSwitchValue())
             {
             	//@TODO Fix Compressor
-            	//myCompressor.stop();
+            	myCompressor.stop();
             	System.out.println("Compressor off");
             }
             else
             {
             	//@TODO Fix COmpressor
-            	//myCompressor.start();
+            	myCompressor.start();
             	System.out.println("Compressor on");
             }
-            */
             
             //switch between different auto modes via SmartDashboard
 			switch(autoChoice)
@@ -221,7 +236,6 @@ public class Robot extends SampleRobot
 					break;
 				}
 			}
-			
 		}		
     }
 
@@ -230,28 +244,27 @@ public class Robot extends SampleRobot
      */
     public void operatorControl() 
     {
-    	System.out.printf("before safety");
+       System.out.printf("before safety");
        myRobot.setSafetyEnabled(true);
-       /**
-       * grab an image from the camera, draw the circle, and provide it for the camera server
-       * which will in turn send it to the dashboard.
-       */
+       
   	   System.err.printf("before NI Vision");
        //NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
        System.out.printf("after NI Vision");
-       cServer.startAutomaticCapture(); 
+       
+       //cServer.startAutomaticCapture(); 
+       tServer.startAutomaticCapture();
        while (isOperatorControl() && isEnabled()) 
         {
         	//usbCamera.startCapture();
-        	
           	//usbCamera.getImage(frame);
           //NIVision.imaqDrawShapeOnImage(frame, frame, rect,DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
           //CameraServer.getInstance().setImage(frame);
           // System.out.println("drawing on camera");
         	
     	   LiveWindow.run();
-    	   //LiveWindow.addSensor("Camera", 0, LiveWindow.component);
-        	//arm at rest  
+    	   LiveWindow.addSensor("Camera", 0, tServer);
+        	
+    	   //arm at rest  
         	if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
         	{
         		lift.set(0);
@@ -290,7 +303,6 @@ public class Robot extends SampleRobot
         	//Mecanum drive
         	if(stick.getX()!=0||stick.getY()!=0||stick.getTwist()!=0)
         	{
-        	
         		/*if(stick.getX()>.05)
         			xAxis=Math.pow((stick.getX()-.05)/(.95),3);
         		if(stick.getX()<-.05)
