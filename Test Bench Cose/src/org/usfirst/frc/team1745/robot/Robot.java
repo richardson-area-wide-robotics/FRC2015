@@ -44,7 +44,7 @@ public class Robot extends SampleRobot
     CANTalon lift; 		//7
     
     DoubleSolenoid mySolenoid;	//2
-    Compressor myCompressor;	//2
+    //Compressor myCompressor;	//2
     
     Joystick stick;		//0
     Joystick gamepad;	//1
@@ -103,7 +103,7 @@ public class Robot extends SampleRobot
         backLeft = new CANTalon(P51RobotDefine.leftBackMecanum_CANID); // Back left    
         frontRight = new CANTalon(P51RobotDefine.rightFrontMecanum_CANID); // Front Right
         backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
-        myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
+        //myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
         //mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
        
         stick = new Joystick(P51RobotDefine.driver_USBJoyStick);
@@ -115,11 +115,11 @@ public class Robot extends SampleRobot
         myRobot.setExpiration(0.1);
         
         //unsure exactly how this works 
-        dashBoard.addObject("None", autoChoiceNone);
-        dashBoard.addObject("Bin", autoChoiceBin);
-        dashBoard.addObject("Tote", autoChoiceTote);
-        dashBoard.addDefault("Robot", autoChoiceRobot);
-        SmartDashboard.putData("Auto-Mode Choice", dashBoard);
+        //dashBoard.addObject("None", autoChoiceNone);
+        //dashBoard.addObject("Bin", autoChoiceBin);
+        //dashBoard.addObject("Tote", autoChoiceTote);
+        //dashBoard.addDefault("Robot", autoChoiceRobot);
+        //SmartDashboard.putData("Auto-Mode Choice", dashBoard);
         //or this
         /*SmartDashboard.putString("nOne", "None");
         SmartDashboard.putString("bIn", "Bin");
@@ -160,17 +160,21 @@ public class Robot extends SampleRobot
         polarOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToPolar_Operator);
         cartesianDriver= new JoystickButton(stick,P51RobotDefine.mecanumModeToCartesian_Driver);
         cartesianOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToCartesian_Operator);
-                
+        
+        //LiveWindow.addSensor("Camera", "Camera", tServer);
+        //LiveWindow.setEnabled(true);
+        //LiveWindow.run();
+        
         /*xAxis=0;
         yAxis=0;
         twist=0;
         magnitude=0;
         angle=0;*/
         
-        frontLeftEnc = new Encoder(0,1,false,EncodingType.k2X);
-        frontRightEnc = new Encoder(0,1,true,EncodingType.k2X);
-        backLeftEnc = new Encoder(0,1,false,EncodingType.k2X);
-        backRightEnc = new Encoder(0,1,true,EncodingType.k2X);
+        //frontLeftEnc = new Encoder(0,1,false,EncodingType.k2X);
+        //frontRightEnc = new Encoder(0,1,true,EncodingType.k2X);
+        //backLeftEnc = new Encoder(0,1,false,EncodingType.k2X);
+        //backRightEnc = new Encoder(0,1,true,EncodingType.k2X);
         
     }
 
@@ -196,16 +200,16 @@ public class Robot extends SampleRobot
 		{
 			//@FIX COmpressor
 			//Turn on compressor if more air is needed
-            if(myCompressor.getPressureSwitchValue())
+           // if(myCompressor.getPressureSwitchValue())
             {
             	//@TODO Fix Compressor
-            	myCompressor.stop();
+            //	myCompressor.stop();
             	System.out.println("Compressor off");
             }
-            else
+            //else
             {
             	//@TODO Fix COmpressor
-            	myCompressor.start();
+            	//myCompressor.start();
             	System.out.println("Compressor on");
             }
             
@@ -252,7 +256,7 @@ public class Robot extends SampleRobot
        System.out.printf("after NI Vision");
        
        //cServer.startAutomaticCapture(); 
-       tServer.startAutomaticCapture();
+       //tServer.startAutomaticCapture();
        while (isOperatorControl() && isEnabled()) 
         {
         	//usbCamera.startCapture();
@@ -334,15 +338,15 @@ public class Robot extends SampleRobot
         	}
         	
         	//Turn on compressor if more air is needed
-            if(myCompressor.getPressureSwitchValue())
+            //if(myCompressor.getPressureSwitchValue())
             {
-            	myCompressor.stop();
+            	//myCompressor.stop();
             	System.out.printf("Compressor off");
             }
-            else
+            //else
             {
             	//@TODO Fix Compressor
-            	myCompressor.start();
+            	//myCompressor.start();
             	System.out.printf("Compressor on");
             }
             

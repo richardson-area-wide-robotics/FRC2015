@@ -57,7 +57,9 @@ public class RobotDriveMath extends Robot
 	
 	public static double polarAngle(double xInput,double yInput)
 	{
-		angle = Math.atan2(yWithDeadband(yInput),xWithDeadband(xInput));
+		//angle = (Math.atan2(yWithDeadband(yInput),xWithDeadband(xInput)))*180/(Math.PI);
+		angle = (Math.asin(yWithDeadband(yInput)/magnitude)*180/3.14159) + 90;
 		return angle;
+		
 	}
 }
