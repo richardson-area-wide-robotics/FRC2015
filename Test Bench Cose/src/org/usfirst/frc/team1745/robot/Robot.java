@@ -7,6 +7,10 @@ import com.ni.vision.NIVision.DrawMode;
 import com.ni.vision.NIVision.Image;
 import com.ni.vision.NIVision.ShapeMode;*/
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
@@ -30,6 +34,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
+
+
 import org.usfirst.frc.team1745.robot.P51RobotDefine;
 import org.usfirst.frc.team1745.robot.P51Camera;
 
@@ -42,6 +48,11 @@ public class Robot extends SampleRobot
     CANTalon backLeft; 	//5
     CANTalon backRight; //6
     CANTalon lift; 		//7
+    
+    int frontLeftEnc;
+    int frontRightEnc;
+    int backLeftEnc;
+    int backRightEnc;
     
     DoubleSolenoid mySolenoid;	//2
     //Compressor myCompressor;	//2
@@ -89,13 +100,14 @@ public class Robot extends SampleRobot
     double magnitude;
     double angle;*/
     
-    Encoder frontLeftEnc;
-    Encoder frontRightEnc;
-    Encoder backLeftEnc;
-    Encoder backRightEnc;
+    //Encoder frontLeftEnc;
+    //Encoder frontRightEnc;
+    //Encoder backLeftEnc;
+    //Encoder backRightEnc;
     
+    PrintWriter writer;
 
-    public Robot() 
+    public Robot()  
     {
        
         lift = new CANTalon(P51RobotDefine.winch_CANID); // Lift
@@ -105,7 +117,7 @@ public class Robot extends SampleRobot
         backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
         //myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
         //mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
-       
+        
         stick = new Joystick(P51RobotDefine.driver_USBJoyStick);
         gamepad = new Joystick(P51RobotDefine.operator_USBJoyStick);
        
@@ -176,6 +188,13 @@ public class Robot extends SampleRobot
         //backLeftEnc = new Encoder(0,1,false,EncodingType.k2X);
         //backRightEnc = new Encoder(0,1,true,EncodingType.k2X);
         
+        tServer.startAutomaticCapture();
+        try {
+			writer = new PrintWriter("P51Log.in");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
     /**
@@ -204,13 +223,13 @@ public class Robot extends SampleRobot
             {
             	//@TODO Fix Compressor
             //	myCompressor.stop();
-            	System.out.println("Compressor off");
+            	writer.println("Compressor off");
             }
             //else
             {
             	//@TODO Fix COmpressor
             	//myCompressor.start();
-            	System.out.println("Compressor on");
+            	writer.println("Compressor on");
             }
             
             //switch between different auto modes via SmartDashboard
@@ -218,25 +237,25 @@ public class Robot extends SampleRobot
 			{
 				case(0)://"None" autonomous selected
 				{
-					System.out.println("Robot will remain still.");
+					writer.println("Robot will remain still.");
 					break;
 				}
 				
 				case(1)://"Bin" autonomous selected
 				{
-					System.out.println("Robot will pickup bin and move to auto zone.");
+					writer.println("Robot will pickup bin and move to auto zone.");
 					break;
 				}
 				
 				case(2)://"Tote" autonomous selected
 				{
-					System.out.println("Robot will pickup yellow tote and move to auto zone.");
+					writer.println("Robot will pickup yellow tote and move to auto zone.");
 					break;
 				}
 				
 				case(3)://"Robot" autonomous selected or no choice made
 				{
-					System.out.println("Robot will move to auto zone.");
+					writer.println("Robot will move to auto zone.");
 					break;
 				}
 			}
@@ -248,27 +267,37 @@ public class Robot extends SampleRobot
      */
     public void operatorControl() 
     {
-       System.out.printf("before safety");
+       writer.printf("before safety");
        myRobot.setSafetyEnabled(true);
        
   	   System.err.printf("before NI Vision");
        //NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
-       System.out.printf("after NI Vision");
+       writer.printf("after NI Vision");
+       
+       
+       gyro.initGyro();
+       gyro.startLiveWindowMode();
        
        //cServer.startAutomaticCapture(); 
-       //tServer.startAutomaticCapture();
+       
        while (isOperatorControl() && isEnabled()) 
         {
         	//usbCamera.startCapture();
           	//usbCamera.getImage(frame);
           //NIVision.imaqDrawShapeOnImage(frame, frame, rect,DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
           //CameraServer.getInstance().setImage(frame);
-          // System.out.println("drawing on camera");
+          // writer.println("drawing on camera");
         	
     	   LiveWindow.run();
     	   LiveWindow.addSensor("Camera", 0, tServer);
-        	
-    	   //arm at rest  
+    	   
+    	   frontLeftEnc = frontLeft.getEncVelocity();
+    	   frontRightEnc = frontRight.getEncVelocity();
+    	   backLeftEnc = backLeft.getEncVelocity();
+    	   backRightEnc = backRight.getEncVelocity();
+    	   
+        	writer.println(frontRightEnc);
+        	//arm at rest  
         	if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
         	{
         		lift.set(0);
@@ -277,13 +306,13 @@ public class Robot extends SampleRobot
        		if(armUpDrive.get()||armUpOp.get())        		
        		{
        			lift.set(P51RobotDefine.armUpSpeed);
-       			System.out.printf("Arm up");
+       			writer.printf("Arm up");
        		}
        		//lift down
        		if(armDownDrive.get()||armDownOp.get())
        		{
        			lift.set(P51RobotDefine.armDownSpeed);
-        		System.out.printf("Arm down");
+        		writer.printf("Arm down");
         	}
         	
        		
@@ -291,16 +320,16 @@ public class Robot extends SampleRobot
         	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on
         	{
         		polarDrive=false;
-        		System.out.printf("Polar Drive Off");
+        		writer.printf("Polar Drive Off");
         		cartesianDrive=true;
-        		System.out.printf("Cartision Drive On");
+        		writer.printf("Cartesian Drive On");
         	}
         	if (polarDriver.get()||polarOp.get())//Polar on
         	{
         		polarDrive=true;
-        		System.out.printf("Polar Drive On");
+        		writer.printf("Polar Drive On");
         		cartesianDrive=false;
-        		System.out.printf("Cartesian Drive Off");
+        		writer.printf("Cartesian Drive Off");
         	}
 
         	
@@ -341,13 +370,13 @@ public class Robot extends SampleRobot
             //if(myCompressor.getPressureSwitchValue())
             {
             	//myCompressor.stop();
-            	System.out.printf("Compressor off");
+            	writer.printf("Compressor off");
             }
             //else
             {
             	//@TODO Fix Compressor
             	//myCompressor.start();
-            	System.out.printf("Compressor on");
+            	writer.printf("Compressor on");
             }
             
             
@@ -356,12 +385,12 @@ public class Robot extends SampleRobot
         	{
         		/*@TODO FIX Solenoid */
         		//mySolenoid.set(Value.kForward);
-            	System.out.printf("claw closed");
+            	writer.printf("claw closed");
         	}
             else
             {/*@TODO FIX Solenoid */
             //	mySolenoid.set(Value.kReverse);
-            	System.out.printf("claw open");
+            	writer.printf("claw open");
             }
         	
         	Timer.delay(0.005);		// wait for a motor update time
@@ -375,6 +404,6 @@ public class Robot extends SampleRobot
      */
     public void test() 
     {
-    	System.out.printf("Welcome to Test Mode!");
+    	writer.printf("Welcome to Test Mode!");
     }
 }
