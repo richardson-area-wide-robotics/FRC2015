@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.Encoder;
 //import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 //import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -31,6 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import edu.wpi.first.wpilibj.vision.AxisCamera;
 //import edu.wpi.first.wpilibj.vision.USBCamera;
+
 
 
 
@@ -49,10 +51,10 @@ public class Robot extends SampleRobot
     CANTalon backRight; //6
     CANTalon lift; 		//7
     
-    int frontLeftEnc;
-    int frontRightEnc;
-    int backLeftEnc;
-    int backRightEnc;
+    double frontLeftEnc;
+    double frontRightEnc;
+    double backLeftEnc;
+    double backRightEnc;
     
     DoubleSolenoid mySolenoid;	//2
     //Compressor myCompressor;	//2
@@ -93,7 +95,17 @@ public class Robot extends SampleRobot
     JoystickButton polarOp;				//12
     JoystickButton cartesianDriver;		//11
     JoystickButton cartesianOp;			//11
+    JoystickButton deadbandInc;			//3
+    JoystickButton deadbandDec;			//4
     
+    Toggle deadbandUp;
+    Toggle deadbandDown;
+    
+    PIDController frontLeftPID;
+    PIDController frontRightPID;
+    PIDController backLeftPID;
+    PIDController backRightPID;
+
     /*double xAxis;
     double yAxis;
     double twist;
@@ -172,6 +184,13 @@ public class Robot extends SampleRobot
         polarOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToPolar_Operator);
         cartesianDriver= new JoystickButton(stick,P51RobotDefine.mecanumModeToCartesian_Driver);
         cartesianOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToCartesian_Operator);
+        deadbandInc = new JoystickButton(stick, P51RobotDefine.deadbandExpIncrement);
+        deadbandDec = new JoystickButton(stick, P51RobotDefine.deadbandExpDecrement);
+        
+        deadbandUp = new Toggle(false);
+        deadbandDown = new Toggle(false);
+        
+        frontLeftPID = new PIDController(1,1,1,);
         
         //LiveWindow.addSensor("Camera", "Camera", tServer);
         //LiveWindow.setEnabled(true);
@@ -267,12 +286,12 @@ public class Robot extends SampleRobot
      */
     public void operatorControl() 
     {
-       writer.printf("before safety");
+       writer.println("before safety");
        myRobot.setSafetyEnabled(true);
        
-  	   System.err.printf("before NI Vision");
+  	   writer.println("before NI Vision");
        //NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
-       writer.printf("after NI Vision");
+       writer.println("after NI Vision");
        
        
        gyro.initGyro();
@@ -306,13 +325,13 @@ public class Robot extends SampleRobot
        		if(armUpDrive.get()||armUpOp.get())        		
        		{
        			lift.set(P51RobotDefine.armUpSpeed);
-       			writer.printf("Arm up");
+       			writer.println("Arm up");
        		}
        		//lift down
        		if(armDownDrive.get()||armDownOp.get())
        		{
        			lift.set(P51RobotDefine.armDownSpeed);
-        		writer.printf("Arm down");
+        		writer.println("Arm down");
         	}
         	
        		
@@ -320,16 +339,16 @@ public class Robot extends SampleRobot
         	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on
         	{
         		polarDrive=false;
-        		writer.printf("Polar Drive Off");
+        		writer.println("Polar Drive Off");
         		cartesianDrive=true;
-        		writer.printf("Cartesian Drive On");
+        		writer.println("Cartesian Drive On");
         	}
         	if (polarDriver.get()||polarOp.get())//Polar on
         	{
         		polarDrive=true;
-        		writer.printf("Polar Drive On");
+        		writer.println("Polar Drive On");
         		cartesianDrive=false;
-        		writer.printf("Cartesian Drive Off");
+        		writer.println("Cartesian Drive Off");
         	}
 
         	
@@ -366,17 +385,20 @@ public class Robot extends SampleRobot
         					RobotDriveMath.twistWithDeadband(stick.getTwist()), gyro.getAngle());
         	}
         	
+        	
+        	
+        	
         	//Turn on compressor if more air is needed
             //if(myCompressor.getPressureSwitchValue())
             {
             	//myCompressor.stop();
-            	writer.printf("Compressor off");
+            	writer.println("Compressor off");
             }
             //else
             {
             	//@TODO Fix Compressor
             	//myCompressor.start();
-            	writer.printf("Compressor on");
+            	writer.println("Compressor on");
             }
             
             
@@ -385,13 +407,24 @@ public class Robot extends SampleRobot
         	{
         		/*@TODO FIX Solenoid */
         		//mySolenoid.set(Value.kForward);
-            	writer.printf("claw closed");
+            	writer.println("claw closed");
         	}
             else
             {/*@TODO FIX Solenoid */
             //	mySolenoid.set(Value.kReverse);
-            	writer.printf("claw open");
+            	writer.println("claw open");
             }
+        	
+        	if (deadbandUp.update(deadbandInc.get()))
+        	{
+        		P51RobotDefine.deadbandExponent += 0.25;
+        		writer.println("Inc to Deadband exp = " + P51RobotDefine.deadbandExponent);
+        	}
+        	if (deadbandDown.update(deadbandDec.get()))
+        	{
+        		P51RobotDefine.deadbandExponent -= 0.25;
+        		writer.println("Dec to Deadband exp = " + P51RobotDefine.deadbandExponent);
+        	}
         	
         	Timer.delay(0.005);		// wait for a motor update time
         }

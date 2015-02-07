@@ -67,13 +67,14 @@ public final class P51RobotDefine
 	public static final int mecanumModeToPolar_Operator = 11;
 	public static final int mecanumModeToCartesian_Driver = 12;
 	public static final int mecanumModeToCartesian_Operator = 12;
-	
+	public static final int deadbandExpIncrement = 3;
+	public static final int deadbandExpDecrement = 4;
 	//Arm Motor Speeds
 	public static final double armUpSpeed = .5;
 	public static final double armDownSpeed = -.5;
 	
 	//Dead-Band Exponent
-	public static final int deadbandExponent = 3;
+	public static double deadbandExponent = 3;
 	
 	public P51RobotDefine()
 	{

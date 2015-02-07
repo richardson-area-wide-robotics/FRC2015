@@ -27,7 +27,11 @@ public class RobotDriveMath extends Robot
 		if(xInput>.05)
 			xAxis=Math.pow((xInput-.05)/(.95),P51RobotDefine.deadbandExponent);
 		if(xInput<-.05)
+		{
 			xAxis=Math.pow((xInput+.05)/(.95),P51RobotDefine.deadbandExponent);
+			if (xAxis>0)
+			xAxis= -xAxis;
+		}
 		 return xAxis;
 	}
 	
