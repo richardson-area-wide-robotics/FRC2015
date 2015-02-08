@@ -5,6 +5,9 @@ package org.usfirst.frc.team1745.robot;
 
 import org.usfirst.frc.team1745.robot.P51RobotDefine;
 
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.RobotDrive.MotorType;
+
 /**
  * @author Adam
  * Contains the math necessary for dead-bands and polar drive
@@ -17,6 +20,16 @@ public class RobotDriveMath extends Robot
     public static double twist;
     public static double magnitude;
     public static double angle;
+    
+    PIDController frontLeftPID;
+    PIDController frontRightPID;
+    PIDController backLeftPID;
+    PIDController backRightPID;
+    
+    static final int kFrontLeft_val = 0;
+    static final int kFrontRight_val = 1;
+    static final int kRearLeft_val = 2;
+    static final int kRearRight_val = 3;
 	
 	public RobotDriveMath()
 	{
@@ -62,7 +75,6 @@ public class RobotDriveMath extends Robot
 	public static double polarAngle(double xInput,double yInput)
 	{
 		angle = ((Math.atan2(yWithDeadband(yInput),xWithDeadband(xInput)))*180/(Math.PI)) + 90;
-		//angle = (Math.asin(yWithDeadband(yInput)/magnitude)*180/3.14159) + 90;
 		return angle;
 		
 	}
