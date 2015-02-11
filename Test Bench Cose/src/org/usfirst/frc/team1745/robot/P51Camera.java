@@ -351,7 +351,8 @@ public class P51Camera extends SensorBase implements PIDSource,LiveWindowSendabl
                             Thread.sleep(period - dt);
                         }
                     } catch (IOException | UnsupportedOperationException ex) {
-                        DriverStation.reportError(ex.getMessage(), true);
+                    	
+                        //DriverStation.reportError(ex.getMessage(), true);
                         break;
                     } finally {
                         imageData.data.free();
