@@ -50,6 +50,7 @@ import org.usfirst.frc.team1745.robot.P51RobotDefine;
 import org.usfirst.frc.team1745.robot.P51Camera;
 
 import com.ni.vision.NIVision;
+import com.ni.vision.NIVision.IMAQdxBufferNumberMode;
 import com.ni.vision.NIVision.Image;
 import com.ni.vision.NIVision.ImageType;
 
@@ -62,6 +63,7 @@ public class Robot extends SampleRobot
     CANTalon backLeft; 	//5
     CANTalon backRight; //6
     CANTalon lift; 		//7
+    CANTalon liftTwo;	//
     
     /*double frontLeftEnc;
     double frontRightEnc;
@@ -164,6 +166,8 @@ public class Robot extends SampleRobot
         backLeft = new CANTalon(P51RobotDefine.leftBackMecanum_CANID); // Back left    
         frontRight = new CANTalon(P51RobotDefine.rightFrontMecanum_CANID); // Front Right
         backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
+        liftTwo =  new CANTalon(8);
+        
         //myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
         //mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
         
@@ -186,7 +190,10 @@ public class Robot extends SampleRobot
         SmartDashboard.putString("bIn", "Bin");
         SmartDashboard.putString("tOte", "Tote");
         SmartDashboard.putString("rObot", "Robot");
-        //Same here
+        //Same here*/
+        SmartDashboard.putBoolean("bIn",false);
+        
+        
         autoChoiceBin=SmartDashboard.getBoolean("bIn");
         autoChoiceTote=SmartDashboard.getBoolean("tOte");
         autoChoiceRobot=SmartDashboard.getBoolean("rObott");
@@ -311,7 +318,7 @@ public class Robot extends SampleRobot
 
     /**
      * Check Driver Station for which Autonomous mode to Run
-     */
+     */	
     public void autonomous() 
     {
     	myRobot.setSafetyEnabled(false);
@@ -322,8 +329,9 @@ public class Robot extends SampleRobot
     	
 		//read file in from disk. For this example to run you need to copy image20.jpg from the SampleImages folder to the
 		//directory shown below using FTP or SFTP: http://wpilib.screenstepslive.com/s/4485/m/24166/l/282299-roborio-ftp
-		NIVision.imaqReadFile(frame, "/home/lvuser/SampleImages/image20.jpg");
-
+		//NIVision.imaqReadFile(frame, "/home/lvuser/SampleImages/image20.jpg");;
+		NIVision.IMAQdxGetImage(0, frame, IMAQdxBufferNumberMode.fromValue(2), 2);
+		
 		//Update threshold values from SmartDashboard. For performance reasons it is recommended to remove this after calibration is finished.
 		TOTE_HUE_RANGE.minValue = (int)SmartDashboard.getNumber("Tote hue min", TOTE_HUE_RANGE.minValue);
 		TOTE_HUE_RANGE.maxValue = (int)SmartDashboard.getNumber("Tote hue max", TOTE_HUE_RANGE.maxValue);
@@ -490,17 +498,21 @@ public class Robot extends SampleRobot
         	if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
         	{
         		lift.set(0);
+        		liftTwo.set(0);
         	}
        		//lift up
        		if(armUpDrive.get()||armUpOp.get())        		
        		{
        			lift.set(P51RobotDefine.armUpSpeed);
+       			liftTwo.set(P51RobotDefine.armUpSpeed);
+       			
        			//writer.println("Arm up");
        		}
        		//lift down
        		if(armDownDrive.get()||armDownOp.get())
        		{
        			lift.set(P51RobotDefine.armDownSpeed);
+       			liftTwo.set(P51RobotDefine.armDownSpeed);
         		//writer.println("Arm down");
         	}
         	
