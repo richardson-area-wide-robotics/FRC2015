@@ -76,6 +76,12 @@ public final class P51RobotDefine
 	//Dead-Band Exponent
 	public static double deadbandExponent = 3;
 	
+	
+	//encoder constants
+	public static final int greyhillClicksPerRevolution = 256;
+	public static final double leftFrontMecanum_InchesPerClick = 0.073385641; //5.98in Diameter wheels * pi / 256 clicks
+
+	
 	public P51RobotDefine()
 	{
 		

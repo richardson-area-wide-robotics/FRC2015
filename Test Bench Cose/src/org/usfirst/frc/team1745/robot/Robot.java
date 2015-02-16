@@ -180,6 +180,7 @@ public class Robot extends SampleRobot
        
         myRobot = new RobotDrive(frontLeft,backLeft,frontRight,backRight);
         myRobot.setInvertedMotor(MotorType.kFrontRight, true);
+        
         myRobot.setInvertedMotor(MotorType.kRearRight, true);
         myRobot.setExpiration(0.1);
         
@@ -259,14 +260,18 @@ public class Robot extends SampleRobot
         //tServer.startAutomaticCapture();
        
         
-    	frontLeft.changeControlMode(ControlMode.valueOf(2));
-    	frontRight.changeControlMode(ControlMode.valueOf(2));
-    	backLeft.changeControlMode(ControlMode.valueOf(2));
-    	backRight.changeControlMode(ControlMode.valueOf(2));
-    	liftSlave.changeControlMode(ControlMode.valueOf(5));
+    	frontLeft.changeControlMode(ControlMode.Speed);
+    	frontRight.changeControlMode(ControlMode.Speed);
+    	backLeft.changeControlMode(ControlMode.Speed);
+    	backRight.changeControlMode(ControlMode.Speed);
     	
+    	liftSlave.changeControlMode(ControlMode.Follower);
     	liftSlave.set(P51RobotDefine.winch_CANID);
     	
+    	frontLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+    	frontRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+    	backLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+    	backRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
     	P = "P";
     	I = "I";
     	D = "D";
@@ -483,25 +488,12 @@ public class Robot extends SampleRobot
      */
     public void operatorControl() 
     {
-       System.out.println("before safety");
+       System.out.println("OperatorControl");
        myRobot.setSafetyEnabled(true);
-       System.out.println("before NI Vision");
-       //NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
-       System.out.println("after NI Vision");
-       
-       System.out.println("before gyro");
-       //gyro.initGyro();
-       //gyro.startLiveWindowMode();
-       System.out.println("after gyro");
-       
-       //cServer.startAutomaticCapture(); 
-       
+                
        while (isOperatorControl() && isEnabled()) 
         {
-    	   
-    	   System.out.println("Teleopenabled");
-    	   System.out.println("in While Loop");	
-    	    //NIVision.imaqDrawShapeOnImage(frame, frame, rect,DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
+    	  //NIVision.imaqDrawShapeOnImage(frame, frame, rect,DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
           //CameraServer.getInstance().setImage(frame);
           
         	
@@ -514,27 +506,12 @@ public class Robot extends SampleRobot
     	   backLeftEnc = backLeft.getEncVelocity();
     	   backRightEnc = backRight.getEncVelocity();*/
     	   
-        	//System.out.println(frontRightEnc);
-        	//arm at rest  
-    	   System.out.println("arm code");
-    	   if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
-        	{
-        		liftMain.set(0);
-        		//liftSlave.set(0);
-        	}
+        	
+    	   
+    	  this.armControl();
+    	  this.clawControl();
+    	  this.driveControl();
        		
-       		if(armUpDrive.get()||armUpOp.get())   //lift up     		
-       		{
-       			liftMain.set(P51RobotDefine.armUpSpeed);
-       			//liftSlave.set(P51RobotDefine.armUpSpeed);
-       			System.out.println("Arm up");
-       		}
-       		if(armDownDrive.get()||armDownOp.get()) //lift down
-       		{
-       			liftMain.set(P51RobotDefine.armDownSpeed);
-       			//liftSlave.set(P51RobotDefine.armDownSpeed);
-        		System.out.println("Arm down");
-        	}
        		System.out.println("mecanum code");
         	//Mecanum drive Switch with buttons 11 & 12
         	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on
@@ -613,6 +590,7 @@ public class Robot extends SampleRobot
         		backLeft.setPID(1, 0, 0);
         		backLeft.setPID(1, 0, 0);
         	}
+        	
 			/*P = Double.toString(SmartDashboard.getNumber("P Value"));
 			I = Double.toString(SmartDashboard.getNumber("I Value"));
 			D = Double.toString(SmartDashboard.getNumber("D Value"));*/
@@ -630,19 +608,8 @@ public class Robot extends SampleRobot
             	System.out.println("Compressor on");
             }*/
             
-            
-            //Actuate Solenoid for claw
-        	if(clawDrive.get()||clawOp.get())
-        	{
-        		//@TODO FIX Solenoid 
-        		mySolenoid.set(Value.kForward);
-            	System.out.println("claw closed");
-        	}
-            else
-            {//@TODO FIX Solenoid 
-            	mySolenoid.set(Value.kReverse);
-            	System.out.println("claw open");
-            }
+           
+        	
         	
         	if (deadbandUp.update(deadbandInc.get()))
         	{
@@ -737,6 +704,46 @@ public class Robot extends SampleRobot
      * Runs during test mode
      */
     public void test() 
+    {
+    	
+    }
+    
+    private void armControl()
+    {
+    	if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
+    	{
+    		liftMain.set(0);
+    		System.out.println("Arm stop");
+    	}
+   		if(armUpDrive.get()||armUpOp.get())   //lift up     		
+   		{
+   			liftMain.set(P51RobotDefine.armUpSpeed);
+   			System.out.println("Arm up");
+   		}
+   		if(armDownDrive.get()||armDownOp.get()) //lift down
+   		{
+   			liftMain.set(P51RobotDefine.armDownSpeed);
+    		System.out.println("Arm down");
+    	}
+    }
+    private void clawControl()
+    {
+    	if(clawDrive.get()||clawOp.get())
+    	{
+    		mySolenoid.set(Value.kForward);
+        	System.out.println("claw closed");
+    	}
+        else
+        {
+        	mySolenoid.set(Value.kReverse);
+        	System.out.println("claw open");
+        }
+    }
+    private void driveControl()
+    {
+    
+    }
+    private void updateDriverStation()
     {
     	
     }
