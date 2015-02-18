@@ -21,8 +21,6 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.Encoder;
-//import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-//import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
@@ -35,18 +33,8 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 //import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import edu.wpi.first.wpilibj.vision.AxisCamera;
 //import edu.wpi.first.wpilibj.vision.USBCamera;
-
-
-
-
-
-
-
-
 import edu.wpi.first.wpilibj.vision.AxisCamera;
-
 import org.usfirst.frc.team1745.robot.P51RobotDefine;
 import org.usfirst.frc.team1745.robot.P51Camera;
 
@@ -57,25 +45,25 @@ import com.ni.vision.NIVision.ImageType;
 
 public class Robot extends SampleRobot 
 {
-    RobotDrive myRobot;
+    final RobotDrive myRobot;
     
-    CANTalon frontLeft; //3
-    CANTalon frontRight;//4
-    CANTalon backLeft; 	//5
-    CANTalon backRight; //6
-    CANTalon liftMain; 		//7
-    CANTalon liftSlave;	//
+    final CANTalon frontLeft; //3
+    final CANTalon frontRight;//4
+    final CANTalon backLeft; 	//5
+    final CANTalon backRight; //6
+    final CANTalon liftMain; 	//7
+    final CANTalon liftSlave;	//8
     
     /*double frontLeftEnc;
     double frontRightEnc;
     double backLeftEnc;
     double backRightEnc;*/
     
-    DoubleSolenoid mySolenoid;	//2
-    Compressor myCompressor;	//2
+    final DoubleSolenoid mySolenoid;	//2
+    final Compressor myCompressor;	//2
     
-    Joystick stick;		//0
-    Joystick gamepad;	//1
+    final Joystick stick;		//0
+    final Joystick gamepad;	//1
     
     SendableChooser dashBoard;
     //Command autoChooser;
@@ -102,19 +90,30 @@ public class Robot extends SampleRobot
 
     JoystickButton armUpDrive;			//7
     JoystickButton armUpOp;				//7
+    
     JoystickButton armDownDrive;		//8
     JoystickButton armDownOp;			//8
+    
     JoystickButton clawDrive;			//10
+    JoystickButton clawTrigger;			//1
     JoystickButton clawOp;				//10
-    JoystickButton polarDriver;			//12
-    JoystickButton polarOp;				//12
-    JoystickButton cartesianDriver;		//11
-    JoystickButton cartesianOp;			//11
+    
+    JoystickButton polarDriver;			//11
+    JoystickButton polarOp;				//11
+    
+    JoystickButton cartesianDriver;		//12
+    JoystickButton cartesianOp;			//12
+    
     JoystickButton deadbandInc;			//3
     JoystickButton deadbandDec;			//4
     
+    JoystickButton PIDControlOn; 		//5
+    JoystickButton PIDControlOff;
+    
+    
     Toggle deadbandUp;
     Toggle deadbandDown;
+    Toggle PIDToggle;
     
     /*PIDController frontLeftPID;
     PIDController frontRightPID;
@@ -136,8 +135,6 @@ public class Robot extends SampleRobot
     //Encoder frontRightEnc;
     //Encoder backLeftEnc;
     //Encoder backRightEnc;
-    
-    
     
 	//Images
 	Image frame;
@@ -161,16 +158,18 @@ public class Robot extends SampleRobot
 	String P;
 	String I;
 	String D;
+	boolean PIDNeedsInit;
+	boolean runPID;
+	boolean PIDDeacivate;
 	
     public Robot()  
     {
-       
-        liftMain = new CANTalon(P51RobotDefine.winch_CANID); // Lift
         frontLeft = new CANTalon(P51RobotDefine.leftFrontMecanum_CANID); // Front Left
         backLeft = new CANTalon(P51RobotDefine.leftBackMecanum_CANID); // Back left    
         frontRight = new CANTalon(P51RobotDefine.rightFrontMecanum_CANID); // Front Right
         backRight=new CANTalon(P51RobotDefine.rightBackMecanum_CANID); // Back Right
-        liftSlave =  new CANTalon(8);
+        liftMain = new CANTalon(P51RobotDefine.winch_CANID); // Lift
+        liftSlave =  new CANTalon(P51RobotDefine.winchSlave_CANID); // Lift Slave
         
         myCompressor = new Compressor(P51RobotDefine.PCM_CANID);
         mySolenoid = new DoubleSolenoid(P51RobotDefine.PCM_CANID, P51RobotDefine.clawSolenoidForward_PCMChan, P51RobotDefine.clawSolenoidBackwards_PCMChan);
@@ -193,25 +192,21 @@ public class Robot extends SampleRobot
         /*SmartDashboard.putString("nOne", "None");
         SmartDashboard.putString("bIn", "Bin");
         SmartDashboard.putString("tOte", "Tote");
-        SmartDashboard.putString("rObot", "Robot");
-        //Same here*/
-        /*SmartDashboard.putBoolean("bIn",false);
-        SmartDashboard.putBoolean("tOte",false);
-        SmartDashboard.putBoolean("rObot",false);
-        SmartDashboard.putBoolean("nOne",false);
+        SmartDashboard.putString("rObot", "Robot");*/
+
         
-        autoChoiceBin=SmartDashboard.getBoolean("bIn");
-        autoChoiceTote=SmartDashboard.getBoolean("tOte");
-        autoChoiceRobot=SmartDashboard.getBoolean("rObot");
-        autoChoiceNone=SmartDashboard.getBoolean("nOne");*/
+        /*autoChoiceBin=SmartDashboard.getBoolean("Bin");
+        autoChoiceTote=SmartDashboard.getBoolean("Tote");
+        autoChoiceRobot=SmartDashboard.getBoolean("Robot");
+        autoChoiceNone=SmartDashboard.getBoolean("None");*/
         
         //frame = NIVision.imaqCreateImage(NIVision.ImageType.IMAGE_RGB, 0);
         // open the camera at the IP address assigned. This is the IP address that the camera
         // can be accessed through the web interface.
-        //camera = new AxisCamera("10.1.91.100");
+        //camera = new AxisCamera("10.1.91.21");
         
-       // vFeed = new LiveWindow();
-       // LiveWindow.setEnabled(true);
+        //vFeed = new LiveWindow();
+        //LiveWindow.setEnabled(true);
         
         //usbCamera = new USBCamera();
         //cServer=CameraServer.getInstance();
@@ -225,21 +220,32 @@ public class Robot extends SampleRobot
         polarDrive=true;
         cartesianDrive=false;
         
-        armUpDrive= new JoystickButton(stick,P51RobotDefine.armUpButton_Driver);
-        armUpOp = new JoystickButton(gamepad,P51RobotDefine.armUpButton_Operator);
-        armDownDrive= new JoystickButton(stick,P51RobotDefine.armDownButton_Driver);
-        armDownOp = new JoystickButton(gamepad,P51RobotDefine.armDownButton_Operator);
-        clawDrive= new JoystickButton(stick,P51RobotDefine.clawControl_Driver);
-        clawOp = new JoystickButton(gamepad,P51RobotDefine.clawControl_Operator);
-        polarDriver= new JoystickButton(stick,P51RobotDefine.mecanumModeToPolar_Driver);
-        polarOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToPolar_Operator);
-        cartesianDriver= new JoystickButton(stick,P51RobotDefine.mecanumModeToCartesian_Driver);
-        cartesianOp = new JoystickButton(gamepad,P51RobotDefine.mecanumModeToCartesian_Operator);
-        deadbandInc = new JoystickButton(stick, P51RobotDefine.deadbandExpIncrement);
-        deadbandDec = new JoystickButton(stick, P51RobotDefine.deadbandExpDecrement);
+        armUpDrive= new JoystickButton(stick, P51RobotDefine.armUpButton_Driver);					//7
+        armUpOp = new JoystickButton(gamepad, P51RobotDefine.armUpButton_Operator);					//7
+        
+        armDownDrive= new JoystickButton(stick, P51RobotDefine.armDownButton_Driver);				//8
+        armDownOp = new JoystickButton(gamepad, P51RobotDefine.armDownButton_Operator);				//8
+        
+        clawDrive= new JoystickButton(stick, P51RobotDefine.clawControl_Driver);					//10
+        clawTrigger = new JoystickButton(stick, P51RobotDefine.clawControl_Trigger);				//1
+        clawOp = new JoystickButton(gamepad, P51RobotDefine.clawControl_Operator);					//10
+        
+        polarDriver= new JoystickButton(stick, P51RobotDefine.mecanumModeToPolar_Driver);			//11
+        polarOp = new JoystickButton(gamepad, P51RobotDefine.mecanumModeToPolar_Operator);			//11
+        
+        cartesianDriver= new JoystickButton(stick, P51RobotDefine.mecanumModeToCartesian_Driver);	//12
+        cartesianOp = new JoystickButton(gamepad, P51RobotDefine.mecanumModeToCartesian_Operator);	//12
+        
+        deadbandInc = new JoystickButton(stick, P51RobotDefine.deadbandExpIncrement);				//3
+        deadbandDec = new JoystickButton(stick, P51RobotDefine.deadbandExpDecrement);				//4
+        
+        PIDControlOn = new JoystickButton(stick, P51RobotDefine.PIDControlerOn);					//5
+        PIDControlOff = new JoystickButton(stick, P51RobotDefine.PIDControlerOff);					//6
+
         
         deadbandUp = new Toggle(false);
         deadbandDown = new Toggle(false);
+        PIDToggle = new Toggle(false);
         
         //LiveWindow.addSensor("Camera", "Camera", tServer);
         //LiveWindow.setEnabled(true);
@@ -258,21 +264,24 @@ public class Robot extends SampleRobot
         
         //tServer.startAutomaticCapture();
        
-        
-    	frontLeft.changeControlMode(ControlMode.valueOf(2));
-    	frontRight.changeControlMode(ControlMode.valueOf(2));
-    	backLeft.changeControlMode(ControlMode.valueOf(2));
-    	backRight.changeControlMode(ControlMode.valueOf(2));
-    	liftSlave.changeControlMode(ControlMode.valueOf(5));
+    	/*frontLeft.changeControlMode(ControlMode.valueOf(15));	//Change to 2 to run PID on start
+    	frontRight.changeControlMode(ControlMode.valueOf(15));	//Change to 2 to run PID on start
+    	backLeft.changeControlMode(ControlMode.valueOf(15));	//Change to 2 to run PID on start
+    	backRight.changeControlMode(ControlMode.valueOf(15));	//Change to 2 to run PID on start
+    	liftMain.changeControlMode(ControlMode.valueOf(15));	//***Change to 1 to run PID on start***/
+    	liftSlave.changeControlMode(ControlMode.valueOf(5));	
     	
     	liftSlave.set(P51RobotDefine.winch_CANID);
     	
     	P = "P";
     	I = "I";
     	D = "D";
-    
     	
+    	PIDNeedsInit = true;
+    	runPID = false;			//Change to true to run PID on Start
+    	PIDDeacivate = false;
     }
+    
 		public class ParticleReport implements Comparator<ParticleReport>, Comparable<ParticleReport>
 		{
 			double PercentAreaToImageArea;
@@ -322,7 +331,27 @@ public class Robot extends SampleRobot
 			SmartDashboard.putNumber("P Value", 1);
 			SmartDashboard.putNumber("I Value", 1);
 			SmartDashboard.putNumber("D Value", 1);
-			//SmartDashboard.putBoolean("PID", true);
+			SmartDashboard.putBoolean("PID", true);
+			
+			SmartDashboard.putBoolean("Polar drive", polarDrive);
+    		SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
+			
+			SmartDashboard.putNumber("Front Left Speed",frontLeftSpeed);
+			SmartDashboard.putNumber("Front Right Speed", frontRightSpeed);
+			SmartDashboard.putNumber("Back Left Speed", backLeftSpeed);
+			SmartDashboard.putNumber("Back Right Speed", backRightSpeed);
+		    
+			SmartDashboard.putBoolean("Polar Drive",polarDrive);
+			SmartDashboard.putBoolean("Cartesian Drive",cartesianDrive);
+			
+	        SmartDashboard.putBoolean("Bin",false);
+	        SmartDashboard.putBoolean("Tote",false);
+	        SmartDashboard.putBoolean("Robot",false);
+	        SmartDashboard.putBoolean("None",false);
+	        
+	        SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
+	        
+	        SmartDashboard.putBoolean("Compressor On", myCompressor.getPressureSwitchValue());
 			
 			//SmartDashboard.putString(P, Double.toString(SmartDashboard.getNumber("P Value")));
 			//SmartDashboard.putString(I, Double.toString(SmartDashboard.getNumber("I Value")));
@@ -330,6 +359,9 @@ public class Robot extends SampleRobot
 			System.out.println("before Gyro");
 			gyro.initGyro();
 			System.out.println("after Gyro");
+			
+			//@TODO find id number
+			NIVision.IMAQdxStartAcquisition(0);
 		}
         
     
@@ -343,8 +375,6 @@ public class Robot extends SampleRobot
     	
 		while(isAutonomous()&&isEnabled())
 		{
-    	
-    	
 		//read file in from disk. For this example to run you need to copy image20.jpg from the SampleImages folder to the
 		//directory shown below using FTP or SFTP: http://wpilib.screenstepslive.com/s/4485/m/24166/l/282299-roborio-ftp
 		//NIVision.imaqReadFile(frame, "/home/lvuser/SampleImages/image20.jpg");;
@@ -418,8 +448,11 @@ public class Robot extends SampleRobot
 
 		Timer.delay(0.005);				// wait for a motor update time
     	
-    	
-    	
+		
+        autoChoiceBin=SmartDashboard.getBoolean("Bin");
+        autoChoiceTote=SmartDashboard.getBoolean("Tote");
+        autoChoiceRobot=SmartDashboard.getBoolean("Robot");
+        autoChoiceNone=SmartDashboard.getBoolean("None");
     	
     	if(autoChoiceNone)
     		autoChoice=0;
@@ -485,71 +518,58 @@ public class Robot extends SampleRobot
     {
        System.out.println("before safety");
        myRobot.setSafetyEnabled(true);
-       System.out.println("before NI Vision");
-       //NIVision.Rect rect = new NIVision.Rect(10, 10, 100, 100);
-       System.out.println("after NI Vision");
-       
-       System.out.println("before gyro");
-       //gyro.initGyro();
-       //gyro.startLiveWindowMode();
-       System.out.println("after gyro");
-       
+       System.out.println("after safety");
+       gyro.startLiveWindowMode();
        //cServer.startAutomaticCapture(); 
-       
        while (isOperatorControl() && isEnabled()) 
         {
     	   
     	   System.out.println("Teleopenabled");
     	   System.out.println("in While Loop");	
-    	    //NIVision.imaqDrawShapeOnImage(frame, frame, rect,DrawMode.DRAW_VALUE, ShapeMode.SHAPE_OVAL, 0.0f);
-          //CameraServer.getInstance().setImage(frame);
-          
+           //CameraServer.getInstance().setImage(frame);
         	
-    	  // LiveWindow.run();
+    	   LiveWindow.run();
     	   //LiveWindow.addSensor("Camera", 1, tServer);
 
-    	   
-    	   /*frontLeftEnc = frontLeft.getEncVelocity();
-    	   frontRightEnc = frontRight.getEncVelocity();
-    	   backLeftEnc = backLeft.getEncVelocity();
-    	   backRightEnc = backRight.getEncVelocity();*/
-    	   
-        	//System.out.println(frontRightEnc);
-        	//arm at rest  
+           //arm at rest  
     	   System.out.println("arm code");
     	   if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
         	{
         		liftMain.set(0);
         		//liftSlave.set(0);
         	}
-       		
-       		if(armUpDrive.get()||armUpOp.get())   //lift up     		
+       		if(armUpDrive.get()||armUpOp.get())   //lift up  *7*
        		{
        			liftMain.set(P51RobotDefine.armUpSpeed);
        			//liftSlave.set(P51RobotDefine.armUpSpeed);
        			System.out.println("Arm up");
        		}
-       		if(armDownDrive.get()||armDownOp.get()) //lift down
+       		if(armDownDrive.get()||armDownOp.get()) //lift down *8*
        		{
        			liftMain.set(P51RobotDefine.armDownSpeed);
        			//liftSlave.set(P51RobotDefine.armDownSpeed);
         		System.out.println("Arm down");
         	}
-       		System.out.println("mecanum code");
+       		
+       		System.out.println("Mecanum code");
         	//Mecanum drive Switch with buttons 11 & 12
-        	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on
+        	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on *12*
         	{
         		polarDrive=false;
         		System.out.println("Polar Drive Off");
         		cartesianDrive=true;
         		System.out.println("Cartesian Drive On");
+        		SmartDashboard.putBoolean("Polar drive", polarDrive);
+        		SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
         	}
-        	if (polarDriver.get()||polarOp.get())//Polar on
+        	if (polarDriver.get()||polarOp.get())//Polar on *11*
         	{
         		polarDrive=true;
         		System.out.println("Polar Drive On");
         		cartesianDrive=false;
         		System.out.println("Cartesian Drive Off");
+        		SmartDashboard.putBoolean("Polar drive", polarDrive);
+        		SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
         	}
 
         	//Mecanum drive
@@ -586,18 +606,31 @@ public class Robot extends SampleRobot
         					RobotDriveMath.yWithDeadband(stick.getY()),
         					RobotDriveMath.twistWithDeadband(stick.getTwist()), gyro.getAngle());
         	}
+        	
         	// PID Stuff
-        	frontLeftSpeed = P51Drive.getSpeeds(0, stick.getX(), stick.getY(), stick.getTwist());
-        	frontRightSpeed = P51Drive.getSpeeds(1, stick.getX(), stick.getY(), stick.getTwist());
-        	backLeftSpeed = P51Drive.getSpeeds(2, stick.getX(), stick.getY(), stick.getTwist());
-        	backRightSpeed = P51Drive.getSpeeds(3, stick.getX(), stick.getY(), stick.getTwist());
+        	frontLeftSpeed = P51Drive.getSpeeds(P51RobotDefine.leftFrontMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+        	frontRightSpeed = P51Drive.getSpeeds(P51RobotDefine.rightFrontMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+        	backLeftSpeed = P51Drive.getSpeeds(P51RobotDefine.leftBackMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+        	backRightSpeed = P51Drive.getSpeeds(P51RobotDefine.rightBackMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+        	
         	System.out.println("PID Stuff");
-        	if(SmartDashboard.getBoolean("PID"))
+        	if(SmartDashboard.getBoolean("PID") && runPID)
         	{
+        		if (PIDNeedsInit)
+        		{
+        			frontLeft.changeControlMode(ControlMode.valueOf(2));
+        	    	frontRight.changeControlMode(ControlMode.valueOf(2));
+        	    	backLeft.changeControlMode(ControlMode.valueOf(2));
+        	    	backRight.changeControlMode(ControlMode.valueOf(2));
+        	    	liftMain.changeControlMode(ControlMode.valueOf(1));
+        	    	PIDNeedsInit = false;
+        		}
         		frontLeft.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
         		frontRight.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
         		backLeft.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
         		backRight.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
+        		liftMain.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
+        		
         		System.out.println("P Value: "+ SmartDashboard.getNumber("P Value"));
         		System.out.println("I Value: "+ SmartDashboard.getNumber("I Value"));
         		System.out.println("D Value: "+ SmartDashboard.getNumber("D Value"));
@@ -606,55 +639,66 @@ public class Robot extends SampleRobot
         		SmartDashboard.putString(I, Double.toString(SmartDashboard.getNumber("I Value")));
         		SmartDashboard.putString(D, Double.toString(SmartDashboard.getNumber("D Value")));
         	}
-        	else// turn off all PIDS
+        	if (PIDDeacivate)// turn off all PIDS
         	{
-        		frontLeft.setPID(1,0,0);
-        		frontRight.setPID(1, 0, 0);
-        		backLeft.setPID(1, 0, 0);
-        		backLeft.setPID(1, 0, 0);
+        		frontLeft.changeControlMode(ControlMode.valueOf(15));	//15 == Disable
+            	frontRight.changeControlMode(ControlMode.valueOf(15));
+            	backLeft.changeControlMode(ControlMode.valueOf(15));
+            	backRight.changeControlMode(ControlMode.valueOf(15));
+            	liftMain.changeControlMode(ControlMode.valueOf(15));
+            	SmartDashboard.putBoolean("PID", false);
+            	PIDDeacivate = false;
         	}
-			/*P = Double.toString(SmartDashboard.getNumber("P Value"));
-			I = Double.toString(SmartDashboard.getNumber("I Value"));
-			D = Double.toString(SmartDashboard.getNumber("D Value"));*/
+        	if(PIDControlOn.get())	//*5*
+        		runPID = true;
+        	if(PIDControlOff.get())	//*6*
+        	{
+        		runPID = false;
+        		PIDNeedsInit = true;
+        		PIDDeacivate = true;
+        	}
+        	
         	
         	//Turn on compressor if more air is needed
-            /*if(myCompressor.getPressureSwitchValue())
+            if(myCompressor.getPressureSwitchValue())
             {
             	myCompressor.stop();
             	System.out.println("Compressor off");
             }
             else
             {
-            	//@TODO Fix Compressor
             	myCompressor.start();
             	System.out.println("Compressor on");
-            }*/
+            }
             
+            SmartDashboard.putBoolean("Compressor On", myCompressor.getPressureSwitchValue());
             
             //Actuate Solenoid for claw
-        	if(clawDrive.get()||clawOp.get())
+        	if(clawDrive.get()||clawOp.get()||clawTrigger.get())	//*10* or *1*
         	{
-        		//@TODO FIX Solenoid 
+        		
         		mySolenoid.set(Value.kForward);
             	System.out.println("claw closed");
         	}
             else
-            {//@TODO FIX Solenoid 
+            {
             	mySolenoid.set(Value.kReverse);
             	System.out.println("claw open");
             }
         	
-        	if (deadbandUp.update(deadbandInc.get()))
+        	if (deadbandUp.update(deadbandInc.get()))	//*3*
         	{
         		P51RobotDefine.deadbandExponent += 0.25;
         		System.out.println("Inc to Deadband exp = " + P51RobotDefine.deadbandExponent);
+        		SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
         	}
-        	if (deadbandDown.update(deadbandDec.get()))
+        	if (deadbandDown.update(deadbandDec.get()))	//*4*
         	{
         		if (P51RobotDefine.deadbandExponent>1.25)
         			{
         				P51RobotDefine.deadbandExponent -= 0.25;
         				System.out.println("Dec to Deadband exp = " + P51RobotDefine.deadbandExponent);
+        				SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
         			}
         	}
         	
