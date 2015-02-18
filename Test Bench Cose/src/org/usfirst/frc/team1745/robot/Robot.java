@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import edu.wpi.first.wpilibj.hal.CanTalonSRX;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 //import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -260,18 +261,18 @@ public class Robot extends SampleRobot
         //tServer.startAutomaticCapture();
        
         
-    	frontLeft.changeControlMode(ControlMode.Speed);
-    	frontRight.changeControlMode(ControlMode.Speed);
-    	backLeft.changeControlMode(ControlMode.Speed);
-    	backRight.changeControlMode(ControlMode.Speed);
+    	//frontLeft.changeControlMode(ControlMode.Speed);
+    	//frontRight.changeControlMode(ControlMode.Speed);
+    	//backLeft.changeControlMode(ControlMode.Speed);
+    	//backRight.changeControlMode(ControlMode.Speed);
     	
     	liftSlave.changeControlMode(ControlMode.Follower);
     	liftSlave.set(P51RobotDefine.winch_CANID);
     	
-    	frontLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-    	frontRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-    	backLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-    	backRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+    	//frontLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+    	//frontRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+    	//backLeft.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+    	//backRight.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
     	P = "P";
     	I = "I";
     	D = "D";
@@ -327,11 +328,11 @@ public class Robot extends SampleRobot
 			SmartDashboard.putNumber("P Value", 1);
 			SmartDashboard.putNumber("I Value", 1);
 			SmartDashboard.putNumber("D Value", 1);
-			//SmartDashboard.putBoolean("PID", true);
+			SmartDashboard.putBoolean("PID", true);
 			
-			//SmartDashboard.putString(P, Double.toString(SmartDashboard.getNumber("P Value")));
-			//SmartDashboard.putString(I, Double.toString(SmartDashboard.getNumber("I Value")));
-			//SmartDashboard.putString(D, Double.toString(SmartDashboard.getNumber("D Value")));
+			SmartDashboard.putString(P, Double.toString(SmartDashboard.getNumber("P Value")));
+			SmartDashboard.putString(I, Double.toString(SmartDashboard.getNumber("I Value")));
+			SmartDashboard.putString(D, Double.toString(SmartDashboard.getNumber("D Value")));
 			System.out.println("before Gyro");
 			gyro.initGyro();
 			System.out.println("after Gyro");
@@ -507,7 +508,7 @@ public class Robot extends SampleRobot
     	   backRightEnc = backRight.getEncVelocity();*/
     	   
         	
-    	   
+    	  
     	  this.armControl();
     	  this.clawControl();
     	  this.driveControl();
@@ -569,7 +570,7 @@ public class Robot extends SampleRobot
         	backLeftSpeed = P51Drive.getSpeeds(2, stick.getX(), stick.getY(), stick.getTwist());
         	backRightSpeed = P51Drive.getSpeeds(3, stick.getX(), stick.getY(), stick.getTwist());
         	System.out.println("PID Stuff");
-        	if(SmartDashboard.getBoolean("PID"))
+        	/*if(false)
         	{
         		frontLeft.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
         		frontRight.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
@@ -579,17 +580,20 @@ public class Robot extends SampleRobot
         		System.out.println("I Value: "+ SmartDashboard.getNumber("I Value"));
         		System.out.println("D Value: "+ SmartDashboard.getNumber("D Value"));
         	
-        		SmartDashboard.putString(P, Double.toString(SmartDashboard.getNumber("P Value")));
-        		SmartDashboard.putString(I, Double.toString(SmartDashboard.getNumber("I Value")));
-        		SmartDashboard.putString(D, Double.toString(SmartDashboard.getNumber("D Value")));
+        		SmartDashboard.putString(P, Double.toString(frontLeft.getP()));
+        		SmartDashboard.putString(I, Double.toString(frontLeft.getI()));
+        		SmartDashboard.putString(D, Double.toString(frontLeft.getD()));
         	}
         	else// turn off all PIDS
         	{
-        		frontLeft.setPID(1,0,0);
-        		frontRight.setPID(1, 0, 0);
-        		backLeft.setPID(1, 0, 0);
-        		backLeft.setPID(1, 0, 0);
-        	}
+        		frontLeft.setProfile(1);
+        		frontRight.setProfile(1);
+        		backLeft.setProfile(1);
+        		backLeft.setProfile(1);
+        		SmartDashboard.putString(P, Double.toString(frontLeft.getP()));
+        		SmartDashboard.putString(I, Double.toString(frontLeft.getI()));
+        		SmartDashboard.putString(D, Double.toString(frontLeft.getD()));
+        	}*/
         	
 			/*P = Double.toString(SmartDashboard.getNumber("P Value"));
 			I = Double.toString(SmartDashboard.getNumber("I Value"));
@@ -738,6 +742,21 @@ public class Robot extends SampleRobot
         	mySolenoid.set(Value.kReverse);
         	System.out.println("claw open");
         }
+    }
+    private void compresorControl()
+    {
+    	//Turn on compressor if more air is needed
+        /*if(myCompressor.getPressureSwitchValue())
+        {
+        	myCompressor.stop();
+        	System.out.println("Compressor off");
+        }
+        else
+        {
+        	//@TODO Fix Compressor
+        	myCompressor.start();
+        	System.out.println("Compressor on");
+        }*/
     }
     private void driveControl()
     {

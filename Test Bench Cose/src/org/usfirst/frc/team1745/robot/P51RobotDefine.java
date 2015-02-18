@@ -58,20 +58,25 @@ public final class P51RobotDefine
 	
 	//Controls operator values are temp
 	public static final int armUpButton_Driver = 7;
-	public static final int armUpButton_Operator = 7;
+	public static final int armUpButton_Operator = 5;
+	
 	public static final int armDownButton_Driver = 8;
-	public static final int armDownButton_Operator = 8;
+	public static final int armDownButton_Operator = 7;
+	
 	public static final int clawControl_Driver = 10;
-	public static final int clawControl_Operator = 10;
+	public static final int clawControl_Operator = 0;
+	
 	public static final int mecanumModeToPolar_Driver = 11;
 	public static final int mecanumModeToPolar_Operator = 11;
+	
 	public static final int mecanumModeToCartesian_Driver = 12;
 	public static final int mecanumModeToCartesian_Operator = 12;
+	
 	public static final int deadbandExpIncrement = 3;
 	public static final int deadbandExpDecrement = 4;
 	//Arm Motor Speeds
-	public static final double armUpSpeed = .5;
-	public static final double armDownSpeed = -.5;
+	public static final double armUpSpeed = 1;
+	public static final double armDownSpeed =-1;
 	
 	//Dead-Band Exponent
 	public static double deadbandExponent = 3;
