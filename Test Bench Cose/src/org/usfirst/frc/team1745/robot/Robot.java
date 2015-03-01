@@ -7,22 +7,19 @@ import com.ni.vision.NIVision.DrawMode;
 import com.ni.vision.NIVision.Image;
 import com.ni.vision.NIVision.ShapeMode;*/
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 import java.util.Vector;
 
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.CANTalon.ControlMode;
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
-import edu.wpi.first.wpilibj.CameraServer;
+//import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+//import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.Encoder;
+//import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Gyro;
-import edu.wpi.first.wpilibj.PIDController;
+//import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.RobotDrive.MotorType;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -529,10 +526,21 @@ public class Robot extends SampleRobot
            //CameraServer.getInstance().setImage(frame);
         	
     	   LiveWindow.run();
+    	   
+    	   
+    	   armControl();
+   		   driveControl();
+       	   compresorControl();
+       	   clawControl();
+       	   updateDriverStation();
+       	   deadbandControl();
+       	   PID();
+       	   
+    	   
     	   //LiveWindow.addSensor("Camera", 1, tServer);
 
            //arm at rest  
-    	   System.out.println("arm code");
+    	   /*System.out.println("arm code");
     	   if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
         	{
         		liftMain.set(0);
@@ -549,18 +557,20 @@ public class Robot extends SampleRobot
        			liftMain.set(P51RobotDefine.armDownSpeed);
        			//liftSlave.set(P51RobotDefine.armDownSpeed);
         		System.out.println("Arm down");
-        	}
+        	}*/
+    	   
+
        		
-       		System.out.println("Mecanum code");
+       		//System.out.println("Mecanum code");
         	//Mecanum drive Switch with buttons 11 & 12
-        	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on *12*
+        	/*if (cartesianDriver.get()||cartesianOp.get())//Cartesian on *12*
         	{
         		polarDrive=false;
         		System.out.println("Polar Drive Off");
         		cartesianDrive=true;
         		System.out.println("Cartesian Drive On");
-        		SmartDashboard.putBoolean("Polar drive", polarDrive);
-        		SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
+        		//SmartDashboard.putBoolean("Polar drive", polarDrive);
+        		//SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
         	}
         	if (polarDriver.get()||polarOp.get())//Polar on *11*
         	{
@@ -568,12 +578,12 @@ public class Robot extends SampleRobot
         		System.out.println("Polar Drive On");
         		cartesianDrive=false;
         		System.out.println("Cartesian Drive Off");
-        		SmartDashboard.putBoolean("Polar drive", polarDrive);
-        		SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
-        	}
+        		//SmartDashboard.putBoolean("Polar drive", polarDrive);
+        		//SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
+        	}*/
 
         	//Mecanum drive
-        	if(stick.getX()!=0||stick.getY()!=0||stick.getTwist()!=0)
+        	/*if(stick.getX()!=0||stick.getY()!=0||stick.getTwist()!=0)
         	{
         		/*if(stick.getX()>.05)
         			xAxis=Math.pow((stick.getX()-.05)/(.95),3);
@@ -588,27 +598,30 @@ public class Robot extends SampleRobot
         		if(stick.getTwist()>.05)
         			twist=Math.pow((stick.getTwist()-.05)/(.95),3);
         		if(stick.getTwist()<-.05)
-        			twist=Math.pow((stick.getTwist()+.05)/(.95),3);*/
+        			twist=Math.pow((stick.getTwist()+.05)/(.95),3);
         		
+
         		
         		if(polarDrive)
         		{
         			//magnitude = Math.sqrt(Math.pow(xAxis,2)+Math.pow(yAxis,2));
         			//angle = Math.atan2(yAxis,xAxis);
-        			System.out.println("driving the robot");
+        			System.out.println("polar driving the robot");
         			myRobot.mecanumDrive_Polar(RobotDriveMath.polarMagnitude(stick.getX(),stick.getY()),
         					RobotDriveMath.polarAngle(stick.getX(),stick.getY()),
         					RobotDriveMath.twistWithDeadband(stick.getTwist()));
         		}
         		if(cartesianDrive)
+        		{
         			System.out.println("cartesian driving the robot");
         			myRobot.mecanumDrive_Cartesian(RobotDriveMath.xWithDeadband(stick.getX()),
         					RobotDriveMath.yWithDeadband(stick.getY()),
         					RobotDriveMath.twistWithDeadband(stick.getTwist()), gyro.getAngle());
-        	}
+        		}
+        	}*/
         	
         	// PID Stuff
-        	frontLeftSpeed = P51Drive.getSpeeds(P51RobotDefine.leftFrontMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+        	/*frontLeftSpeed = P51Drive.getSpeeds(P51RobotDefine.leftFrontMotorInt, stick.getX(), stick.getY(), stick.getTwist());
         	frontRightSpeed = P51Drive.getSpeeds(P51RobotDefine.rightFrontMotorInt, stick.getX(), stick.getY(), stick.getTwist());
         	backLeftSpeed = P51Drive.getSpeeds(P51RobotDefine.leftBackMotorInt, stick.getX(), stick.getY(), stick.getTwist());
         	backRightSpeed = P51Drive.getSpeeds(P51RobotDefine.rightBackMotorInt, stick.getX(), stick.getY(), stick.getTwist());
@@ -634,10 +647,7 @@ public class Robot extends SampleRobot
         		System.out.println("P Value: "+ SmartDashboard.getNumber("P Value"));
         		System.out.println("I Value: "+ SmartDashboard.getNumber("I Value"));
         		System.out.println("D Value: "+ SmartDashboard.getNumber("D Value"));
-        	
-        		SmartDashboard.putString(P, Double.toString(SmartDashboard.getNumber("P Value")));
-        		SmartDashboard.putString(I, Double.toString(SmartDashboard.getNumber("I Value")));
-        		SmartDashboard.putString(D, Double.toString(SmartDashboard.getNumber("D Value")));
+
         	}
         	if (PIDDeacivate)// turn off all PIDS
         	{
@@ -656,10 +666,10 @@ public class Robot extends SampleRobot
         		runPID = false;
         		PIDNeedsInit = true;
         		PIDDeacivate = true;
-        	}
+        	}*/
         	
         	
-        	//Turn on compressor if more air is needed
+        	/*//Turn on compressor if more air is needed
             if(myCompressor.getPressureSwitchValue())
             {
             	myCompressor.stop();
@@ -669,12 +679,13 @@ public class Robot extends SampleRobot
             {
             	myCompressor.start();
             	System.out.println("Compressor on");
-            }
+            }*/
+
             
-            SmartDashboard.putBoolean("Compressor On", myCompressor.getPressureSwitchValue());
+            //SmartDashboard.putBoolean("Compressor On", myCompressor.getPressureSwitchValue());
             
             //Actuate Solenoid for claw
-        	if(clawDrive.get()||clawOp.get()||clawTrigger.get())	//*10* or *1*
+        	/*if(clawDrive.get()||clawOp.get()||clawTrigger.get())	//*10* or *1*
         	{
         		
         		mySolenoid.set(Value.kForward);
@@ -684,13 +695,14 @@ public class Robot extends SampleRobot
             {
             	mySolenoid.set(Value.kReverse);
             	System.out.println("claw open");
-            }
+            }*/
         	
-        	if (deadbandUp.update(deadbandInc.get()))	//*3*
+        	
+        	/*if (deadbandUp.update(deadbandInc.get()))	//*3*
         	{
         		P51RobotDefine.deadbandExponent += 0.25;
         		System.out.println("Inc to Deadband exp = " + P51RobotDefine.deadbandExponent);
-        		SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
+        		//SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
         	}
         	if (deadbandDown.update(deadbandDec.get()))	//*4*
         	{
@@ -698,9 +710,11 @@ public class Robot extends SampleRobot
         			{
         				P51RobotDefine.deadbandExponent -= 0.25;
         				System.out.println("Dec to Deadband exp = " + P51RobotDefine.deadbandExponent);
-        				SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
+        				//SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
         			}
-        	}
+        	}*/
+        	
+
         	
         	Timer.delay(0.005);		// wait for a motor update time
         }//end main while loop
@@ -784,4 +798,163 @@ public class Robot extends SampleRobot
     {
     	
     }
+    
+    private void armControl()
+    {
+    	if(!(armUpDrive.get()||armUpOp.get()||armDownDrive.get()||armDownOp.get()))
+    	{
+    		liftMain.set(0);
+    		System.out.println("Arm stop");
+    	}
+   		if(armUpDrive.get()||armUpOp.get())   //lift up     		
+   		{
+   			liftMain.set(P51RobotDefine.armUpSpeed);
+   			System.out.println("Arm up");
+   		}
+   		if(armDownDrive.get()||armDownOp.get()) //lift down
+   		{
+   			liftMain.set(P51RobotDefine.armDownSpeed);
+    		System.out.println("Arm down");
+    	}
+    }
+    private void clawControl()
+    {
+    	if(clawDrive.get()||clawOp.get())
+    	{
+    		mySolenoid.set(Value.kForward);
+        	System.out.println("claw closed");
+    	}
+        else
+        {
+        	mySolenoid.set(Value.kReverse);
+        	System.out.println("claw open");
+        }
+    }
+    private void compresorControl()
+    {
+    	//Turn on compressor if more air is needed
+        if(myCompressor.getPressureSwitchValue())
+        {
+        	myCompressor.stop();
+        	System.out.println("Compressor off");
+        }
+        else
+        {
+        	//@TODO Fix Compressor
+        	myCompressor.start();
+        	System.out.println("Compressor on");
+        }
+    }
+    private void driveControl()
+    {
+    	if (cartesianDriver.get()||cartesianOp.get())//Cartesian on *12*
+    	{
+    		polarDrive=false;
+    		System.out.println("Polar Drive Off");
+    		cartesianDrive=true;
+    		System.out.println("Cartesian Drive On");
+
+    	}
+    	if (polarDriver.get()||polarOp.get())//Polar on *11*
+    	{
+    		polarDrive=true;
+    		System.out.println("Polar Drive On");
+    		cartesianDrive=false;
+    		System.out.println("Cartesian Drive Off");
+    	}
+    	
+		if(polarDrive)
+		{
+			System.out.println("polar driving the robot");
+			myRobot.mecanumDrive_Polar(RobotDriveMath.polarMagnitude(stick.getX(),stick.getY()),
+					RobotDriveMath.polarAngle(stick.getX(),stick.getY()),
+					RobotDriveMath.twistWithDeadband(stick.getTwist()));
+		}
+		if(cartesianDrive)
+		{
+			System.out.println("cartesian driving the robot");
+			myRobot.mecanumDrive_Cartesian(RobotDriveMath.xWithDeadband(stick.getX()),
+					RobotDriveMath.yWithDeadband(stick.getY()),
+					RobotDriveMath.twistWithDeadband(stick.getTwist()), gyro.getAngle());
+		}
+    }
+    private void updateDriverStation()
+    {
+    	SmartDashboard.putBoolean("Polar drive", polarDrive);
+		SmartDashboard.putBoolean("Cartesian drive", cartesianDrive);
+		SmartDashboard.putString(P, Double.toString(SmartDashboard.getNumber("P Value")));
+		SmartDashboard.putString(I, Double.toString(SmartDashboard.getNumber("I Value")));
+		SmartDashboard.putString(D, Double.toString(SmartDashboard.getNumber("D Value")));
+		SmartDashboard.putBoolean("Compressor On", myCompressor.getPressureSwitchValue());
+		SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
+    }
+    private void deadbandControl()
+    {
+    	if (deadbandUp.update(deadbandInc.get()))	//*3*
+    	{
+    		P51RobotDefine.deadbandExponent += 0.25;
+    		System.out.println("Inc to Deadband exp = " + P51RobotDefine.deadbandExponent);
+    		//SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
+    	}
+    	if (deadbandDown.update(deadbandDec.get()))	//*4*
+    	{
+    		if (P51RobotDefine.deadbandExponent>1.25)
+    			{
+    				P51RobotDefine.deadbandExponent -= 0.25;
+    				System.out.println("Dec to Deadband exp = " + P51RobotDefine.deadbandExponent);
+    				//SmartDashboard.putNumber("Deadband Exponent", P51RobotDefine.deadbandExponent);
+    			}
+    	}
+    }
+    private void PID()
+    {
+    	System.out.println("PID Stuff");
+    	
+    	frontLeftSpeed = P51Drive.getSpeeds(P51RobotDefine.leftFrontMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+    	frontRightSpeed = P51Drive.getSpeeds(P51RobotDefine.rightFrontMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+    	backLeftSpeed = P51Drive.getSpeeds(P51RobotDefine.leftBackMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+    	backRightSpeed = P51Drive.getSpeeds(P51RobotDefine.rightBackMotorInt, stick.getX(), stick.getY(), stick.getTwist());
+    	
+    	if(SmartDashboard.getBoolean("PID") && runPID)
+    	{
+    		if (PIDNeedsInit)
+    		{
+    			frontLeft.changeControlMode(ControlMode.valueOf(2));
+    	    	frontRight.changeControlMode(ControlMode.valueOf(2));
+    	    	backLeft.changeControlMode(ControlMode.valueOf(2));
+    	    	backRight.changeControlMode(ControlMode.valueOf(2));
+    	    	liftMain.changeControlMode(ControlMode.valueOf(1));
+    	    	PIDNeedsInit = false;
+    		}
+    		frontLeft.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
+    		frontRight.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
+    		backLeft.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
+    		backRight.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
+    		liftMain.setPID(SmartDashboard.getNumber("P Value"), SmartDashboard.getNumber("I Value"), SmartDashboard.getNumber("D Value"));
+    		
+    		System.out.println("P Value: "+ SmartDashboard.getNumber("P Value"));
+    		System.out.println("I Value: "+ SmartDashboard.getNumber("I Value"));
+    		System.out.println("D Value: "+ SmartDashboard.getNumber("D Value"));
+
+    	}
+    	if (PIDDeacivate)// turn off all PIDS
+    	{
+    		frontLeft.changeControlMode(ControlMode.valueOf(15));	//15 == Disable
+        	frontRight.changeControlMode(ControlMode.valueOf(15));
+        	backLeft.changeControlMode(ControlMode.valueOf(15));
+        	backRight.changeControlMode(ControlMode.valueOf(15));
+        	liftMain.changeControlMode(ControlMode.valueOf(15));
+        	SmartDashboard.putBoolean("PID", false);
+        	PIDDeacivate = false;
+    	}
+    	if(PIDControlOn.get())	//*5*
+    		runPID = true;
+    	if(PIDControlOff.get())	//*6*
+    	{
+    		runPID = false;
+    		PIDNeedsInit = true;
+    		PIDDeacivate = true;
+    	}
+    }
+    
 }

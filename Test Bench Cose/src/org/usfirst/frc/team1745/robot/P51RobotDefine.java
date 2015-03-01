@@ -11,7 +11,7 @@ package org.usfirst.frc.team1745.robot;
  */
 public final class P51RobotDefine
 {
-	enum CircuitBrakerSize {TWENTYAMP, THIRTYAMP, FOURTYAMP};
+	enum CircuitBrakerSize {TWENTYAMP, TENAMP, FOURTYAMP};
 	enum MotorTypes {BAGMOTOR, MINICIMMOTOR, CIMMOTOR};
 	enum GearBoxType {VERSAPLANETARY1to12, VERSAPLANETARY1to63};
 	
@@ -48,6 +48,9 @@ public final class P51RobotDefine
 	public static final CircuitBrakerSize rightBackMecanum_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
 	public static final CircuitBrakerSize winch_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
 	public static final CircuitBrakerSize winchSlave_CircutBreaker = CircuitBrakerSize.FOURTYAMP;
+	public static final CircuitBrakerSize roboRio_CircutBreaker = CircuitBrakerSize.TENAMP;
+	public static final CircuitBrakerSize PDP_CircutBreaker = CircuitBrakerSize.TWENTYAMP;
+	public static final CircuitBrakerSize PCM_CircutBreaker = CircuitBrakerSize.TWENTYAMP;
 	
 	//Motor Types
 	public static final MotorTypes leftFrontMecanum_MotorType = MotorTypes.CIMMOTOR;
@@ -99,6 +102,10 @@ public final class P51RobotDefine
 	
 	//Dead-Band Exponent
 	public static double deadbandExponent = 3;
+	
+	//encoder constants
+	public static final int greyhillClicksPerRevolution = 256;
+	public static final double leftFrontMecanum_InchesPerClick = 0.073385641; //5.98in Diameter wheels * pi / 256 clicks
 	
 	public P51RobotDefine()
 	{
